@@ -12,10 +12,10 @@ function(app, Cartofolio) {
 		initialize: function () {
 
 			app.layouts.mondo = new Backbone.Layout({
-		  		template: "mondo",
-		  		el: "body"
+		  		template: "mondo"
 	  		});
 	  		app.layouts.mondo.render();
+	  		console.log("Mondo rendered");
 	  		
 	  		
 	  		app.numprojects = 0;
@@ -36,6 +36,7 @@ function(app, Cartofolio) {
 			
 			app.layouts.main = new pageView({
 				template: "main",
+				el: "#main",
 				attributes: {
 					id: "main"
 				}
@@ -72,7 +73,7 @@ function(app, Cartofolio) {
 			});
 			app.layouts.carto = new Cartofolio.Views.Mapview({});
 			
-			app.layouts.mondo.insertView("#mondo", app.layouts.debug).render();
+			app.layouts.main.insertView(app.layouts.debug).render();
 
 			
 
@@ -92,21 +93,21 @@ function(app, Cartofolio) {
 
 	carto: function() {
 		console.log("carto route");
-		app.layouts.mondo.setView(".container", app.layouts.carto).render();			
+		app.layouts.main.setView(".container", app.layouts.carto).render();			
 	},
 	
 	skeleton: function() {
 		console.log("skeleton route");
-		app.layouts.mondo.setView(".container", app.layouts.skel).render();
+		app.layouts.main.setView(".container", app.layouts.skel).render();
 		app.layouts.skel.showprojects();
 	},
 	contact: function() {
 		console.log("contact route");
-		app.layouts.mondo.setView(".container", app.layouts.contact).render();
+		app.layouts.main.setView(".container", app.layouts.contact).render();
 	},
 	resumes: function() {
 		console.log("resumes route");
-		app.layouts.mondo.setView(".container", app.layouts.resumes).render();
+		app.layouts.main.setView(".container", app.layouts.resumes).render();
 	},
 	
 	debug: function() {
@@ -126,7 +127,6 @@ function(app, Cartofolio) {
 	
 	index: function() {
 		console.log("index route called.");
-		app.layouts.mondo.setView(".container", app.layouts.home).render();			
 	},
 
 	splatter: function (splat) {
@@ -168,8 +168,7 @@ function(app, Cartofolio) {
 		initialize: function () {
 			
 			this.collection.on("reset", function () {
-				console.log("elders reset. includes:");
-				console.log(this.collection);
+				console.log("elders reset");
 			});
 			console.log("page view init: " + this.attributes.id);
 			
