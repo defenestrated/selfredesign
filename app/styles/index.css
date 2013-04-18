@@ -8,12 +8,43 @@
 /*-- Application stylesheets. -----------------------------------------------*/
 
 /* !-------------   mondo   --------------- */
-
+@font-face {
+			font-family: FuturaBk;
+			src: url("fonts/futBk.otf");
+}
+@font-face {
+	font-family: FuturaBk;
+	font-style: italic;
+	src: url("fonts/futBkObl.otf");
+}
+@font-face {
+	font-family: Futura;
+	src: url("fonts/futMed.otf");
+}
+@font-face {
+	font-family: Futura;
+	font-style: italic;
+	src: url("fonts/futMedObl.otf");
+}
+@font-face {
+	font-family: Futura;
+	font-weight: bold;
+	src: url("fonts/futHeavy.otf");
+}
+@font-face {
+	font-family: Futura;
+	font-style: italic;
+	font-weight: bold;
+	src: url("fonts/futHeavyObl.otf");
+}
+		
 .container {
 	border: 1px solid red;
+	position: absolute;
+	width: 100%;
+	left: 0;
+	top: 0;
 }
-
-/* !-------------   home   --------------- */
 
 .debug {
 	position: fixed;
@@ -25,6 +56,10 @@
 	color: white;
 	padding: 50px;
 }
+
+/* !-------------   home   --------------- */
+
+
 
 /* !-------------   projects   --------------- */
 

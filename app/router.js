@@ -12,18 +12,12 @@ function(app, Cartofolio) {
 		initialize: function () {
 
 			app.layouts.mondo = new Backbone.Layout({
-		  		template: "mondo"
+		  		template: "mondo",
+		  		el: "body"
 	  		});
-	  		app.layouts.mondo.render();
-	  		console.log("Mondo rendered");
+	  		app.layouts.mondo.render();	  		
 	  		
-	  		
-	  		app.numprojects = 0;
-			
-			
-
 			console.log("router initializing...");
-
 			
 			mainrouter.getPosts(function (data) {			
 				_.each(data.posts, function(post) {
@@ -73,7 +67,7 @@ function(app, Cartofolio) {
 			});
 			app.layouts.carto = new Cartofolio.Views.Mapview({});
 			
-			app.layouts.main.insertView(app.layouts.debug).render();
+			app.layouts.mondo.insertView(app.layouts.debug).render();
 
 			
 
@@ -127,6 +121,7 @@ function(app, Cartofolio) {
 	
 	index: function() {
 		console.log("index route called.");
+		app.layouts.mondo.insertView(".container", app.layouts.home).render();
 	},
 
 	splatter: function (splat) {
