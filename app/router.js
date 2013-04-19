@@ -28,38 +28,37 @@ function(app, Cartofolio) {
 				Cartofolio.extractElders();
 			});
 			
-			app.layouts.main = new pageView({
-				template: "main",
-				el: "#main",
+			app.layouts.nav = new pageView({
+				template: "nav",
 				attributes: {
-					id: "main"
+					name: "nav"
 				}
 			});
 			app.layouts.home = new pageView({
 				template: "home",
 				attributes: {
-					id: "home"
+					name: "home"
 				}
 			});
 			app.layouts.contact = new pageView({
 				template: "contact",
 				attributes: {
-					id: "contact"
+					name: "contact"
 				}
 			});
 			app.layouts.resumes = new pageView({
 				template: "resumes",
 				attributes: {
-					id: "resumes"
+					name: "contact"
 				}
 			});
 			
 			app.layouts.debug = new pageView({
 				template: "debug",
+				className: "debug",
 				attributes: {
-					id: "debug"
-				},
-				className: "debug"
+					name: "debug"
+				}
 			});
 			
 			app.layouts.skel = new Cartofolio.Views.Skeletonview({
@@ -80,28 +79,30 @@ function(app, Cartofolio) {
 		"contact": "contact",
 		"resumes": "resumes",
 		"debug": "debug",
-		"download/*path": "download",
 		"": "index",
 		"*splat": "splatter"
 	},
 
 	carto: function() {
 		console.log("carto route");
-		app.layouts.main.setView(".container", app.layouts.carto).render();			
+		app.layouts.mondo.setView(".container", app.layouts.carto).render();			
 	},
 	
 	skeleton: function() {
 		console.log("skeleton route");
-		app.layouts.main.setView(".container", app.layouts.skel).render();
-		app.layouts.skel.showprojects();
+		app.layouts.mondo.setView(".nav", app.layouts.nav).render();
+		app.layouts.mondo.setView(".container", app.layouts.skel).render();
+		//app.layouts.skel.showprojects();
 	},
 	contact: function() {
 		console.log("contact route");
-		app.layouts.main.setView(".container", app.layouts.contact).render();
+		app.layouts.mondo.setView(".nav", app.layouts.nav).render();
+		app.layouts.mondo.setView(".container", app.layouts.contact).render();
 	},
 	resumes: function() {
 		console.log("resumes route");
-		app.layouts.main.setView(".container", app.layouts.resumes).render();
+		app.layouts.mondo.setView(".nav", app.layouts.nav).render();
+		app.layouts.mondo.setView(".container", app.layouts.resumes).render();
 	},
 	
 	debug: function() {
@@ -115,13 +116,16 @@ function(app, Cartofolio) {
 		});
 	},
 	
-	download: function ( path ) {
-		console.log("download " + path);
-	},
-	
 	index: function() {
 		console.log("index route called.");
-		app.layouts.mondo.insertView(".container", app.layouts.home).render();
+		if ($(".nav").length) {
+			$(".nav").fadeOut("slow", function() {
+				app.layouts.mondo.setView(".container", app.layouts.home).render();
+			});
+		}
+		else {
+			app.layouts.mondo.setView(".container", app.layouts.home).render();
+		}
 	},
 
 	splatter: function (splat) {
@@ -163,16 +167,28 @@ function(app, Cartofolio) {
 		initialize: function () {
 			
 			this.collection.on("reset", function () {
-				console.log("elders reset");
+				//console.log("elders reset");
 			});
-			console.log("page view init: " + this.attributes.id);
 			
-			if (this.attributes.id != "home") {
-			}
-			else {
+			if (typeof this.attributes.name !== "undefined") {
+				console.log("page view init: " + this.attributes.name);
+				if (this.template != "home") {
+				}
+				else {
+				}
 			}
 		}
 	});
+	
+	function switchTo( newlayout ) {
+		console.log("switching view to " + newlayout.attributes.name);
+		if ($(".container").length) {
+			$(".container").fadeOut("fast", function(){
+				app.layouts.mondo.setView(".container", app.layouts.resumes).render();
+				$(".container").fadeIn("fast");
+			});
+		}
+	}
 
   return mainrouter;
 
