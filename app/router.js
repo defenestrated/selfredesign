@@ -30,35 +30,29 @@ function(app, Cartofolio) {
 			
 			app.layouts.nav = new pageView({
 				template: "nav",
-				attributes: {
-					name: "nav"
+				className: "nav",
+				afterRender: function() {
+					if (!$(".nav").is(":visible")) {
+						$(".nav").fadeIn("slow");
+					}
 				}
 			});
 			app.layouts.home = new pageView({
 				template: "home",
-				attributes: {
-					name: "home"
-				}
+				className: "home"
 			});
 			app.layouts.contact = new pageView({
 				template: "contact",
-				attributes: {
-					name: "contact"
-				}
+				className: "contact"
 			});
 			app.layouts.resumes = new pageView({
 				template: "resumes",
-				attributes: {
-					name: "contact"
-				}
+				className: "resumes"
 			});
 			
 			app.layouts.debug = new pageView({
 				template: "debug",
-				className: "debug",
-				attributes: {
-					name: "debug"
-				}
+				className: "debug"
 			});
 			
 			app.layouts.skel = new Cartofolio.Views.Skeletonview({
@@ -90,8 +84,7 @@ function(app, Cartofolio) {
 	
 	skeleton: function() {
 		console.log("skeleton route");
-		app.layouts.mondo.setView(".nav", app.layouts.nav).render();
-		app.layouts.mondo.setView(".container", app.layouts.skel).render();
+		switchTo( app.layouts.skel );
 		//app.layouts.skel.showprojects();
 	},
 	contact: function() {
@@ -118,14 +111,7 @@ function(app, Cartofolio) {
 	
 	index: function() {
 		console.log("index route called.");
-		if ($(".nav").length) {
-			$(".nav").fadeOut("slow", function() {
-				app.layouts.mondo.setView(".container", app.layouts.home).render();
-			});
-		}
-		else {
-			app.layouts.mondo.setView(".container", app.layouts.home).render();
-		}
+		switchTo( app.layouts.home );
 	},
 
 	splatter: function (splat) {
@@ -163,6 +149,7 @@ function(app, Cartofolio) {
 	var pageView = Backbone.Layout.extend({
 	
 		collection: Cartofolio.elders,
+		className: "defaultPageClass",
 		
 		initialize: function () {
 			
@@ -170,24 +157,94 @@ function(app, Cartofolio) {
 				//console.log("elders reset");
 			});
 			
-			if (typeof this.attributes.name !== "undefined") {
-				console.log("page view init: " + this.attributes.name);
-				if (this.template != "home") {
-				}
-				else {
-				}
-			}
+/* 			console.log("pageView init: " + this.className); */
 		}
 	});
 	
 	function switchTo( newlayout ) {
-		console.log("switching view to " + newlayout.attributes.name);
-		if ($(".container").length) {
-			$(".container").fadeOut("fast", function(){
-				app.layouts.mondo.setView(".container", app.layouts.resumes).render();
-				$(".container").fadeIn("fast");
+		
+		console.log(":: switching to " + newlayout.className);
+		
+		if (newlayout.className == "home") { // GOING TO HOME PAGE
+			
+			
+			/* !BROKEN */
+			
+			// spits out dom exception 3 - probably it can be fixed
+			// by cleaning up the hierarchy and just fading out and in a single entire meta-container.
+			
+			if ($(".nav").length) {
+				$(".nav").fadeOut("slow");
+			}
+			if ($(".container").length) {
+				$(".container").fadeOut("slow", function () {
+					app.layouts.mondo.setView(".container", newlayout).render().done(function () {
+						$(".container").fadeIn("slow");
+					});
+				});	
+			}
+			
+			else {
+				app.layouts.mondo.setView(".container", newlayout).render().done(function () {
+					$(".container").fadeIn("slow");
+				});
+			}
+		}
+		
+		else { // NOT GOING TO HOME PAGE
+			if ($(".container").length) {
+				$(".container").fadeOut("slow", function () {
+					app.layouts.mondo.setView(".nav", app.layouts.nav).render();
+					app.layouts.mondo.setView(".container", newlayout).render().done(function () {
+						$(".container").fadeIn("slow");
+					});
+				});				
+			}
+			
+			else {
+				app.layouts.mondo.setView(".container", newlayout).render().done(function () {
+					$(".container").fadeIn("slow");
+				});
+			}
+		}
+		
+				
+		/*
+if ($(".container").length) {
+			// container exists
+			if (typeof newlayout.attributes !== "undefined") {
+				if (newlayout.attributes.name != "home") {
+					$(".container").fadeOut("slow", function(){
+						app.layouts.mondo.setView(".nav", app.layouts.nav).render();
+						
+				}
+			}
+			
+			else {
+				if ($(".nav").length) { // kill nav bar on home page
+					$(".nav").fadeOut("slow");
+				}
+			}
+			$(".container").fadeOut("slow", function(){
+						app.layouts.mondo.setView(".nav", app.layouts.nav).render();
+					else {
+						if ($(".nav").length) { // kill nav bar on home page
+							$(".nav").fadeOut("slow");
+						}
+					}
+				}
+				app.layouts.mondo.setView(".container", newlayout).render();
+				$(".container").fadeIn("slow");
 			});
 		}
+		else {
+			// container doesn't exist
+			app.layouts.mondo.setView(".container", newlayout).render().done(function () {
+				$(".container").fadeIn("slow");
+			});
+		}
+*/
+	
 	}
 
   return mainrouter;

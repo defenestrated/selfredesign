@@ -46,10 +46,19 @@
 	top: 0;
 }
 .container {
-	border: 1px solid red;
+	display: none;
+	border: 1px solid black;
 	width: 100%;
 	left: 0;
 	top: 0;
+}
+
+.nav {
+	display: none;
+}
+
+.home {
+	background: rgba(0,0,255,0.3);
 }
 
 .debug {

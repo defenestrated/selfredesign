@@ -40,7 +40,8 @@ function(app, Project, Controls) {
   Cartofolio.Views.Skeletonview = Backbone.Layout.extend({
 	  
 	  template: "skeleton",
-	  className: "cartofolio_skeleton",
+	  className: "skeleton",
+	  
 	  collection: Cartofolio.elders,
 	  
 	  projectgroup: {},
@@ -62,12 +63,10 @@ function(app, Project, Controls) {
 			this.collection.on("reset", function () { // wait for the collection to be populated before showing
 					console.log("elders reset");
 					lay.showprojects();
-				});
-				
-			if (this.collection.length != 1) { // if it's already been loaded, the reset won't ever fire, so just show it
-				lay.showprojects();
-			}
-			
+				});			
+		}
+		if (this.collection.length != 1) { // if it's already been loaded, the reset won't ever fire, so just show it
+			lay.showprojects();
 		}
 	  },
 	  
