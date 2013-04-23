@@ -49,7 +49,7 @@ a {
    	transition:color .1s ease-in-out;
 
 }
-a:hover { color: white }
+a:hover { color: rgb(251,255,103) }
 a:active { color: red }
 
 html {
@@ -127,7 +127,7 @@ a.logo {
    	transition:color .1s ease-in-out;
 }
 .nav a:hover {
-	color: white;
+	color: rgb(251,255,103);
 }
 
 .debug {
@@ -154,7 +154,7 @@ a.logo {
 	font: normal normal 16px/1.2em "Futura", "Lucida Console", monospace;
 	letter-spacing: 0.12em;
 }
-.home a:hover { color: white }
+.home a:hover { color: rgb(251,255,103) }
 .home a:active { color: red }
 
 .home ul {
