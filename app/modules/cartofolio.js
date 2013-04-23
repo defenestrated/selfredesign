@@ -50,8 +50,7 @@ function(app, Project, Controls) {
 	  /* !skeleton init */
 	  initialize: function(){
 	  	_.bindAll(this);
-		console.log("- skeleton view initialized. el: ");
-		console.log(this.el);
+		console.log("- skeleton view initialized.");
 	  },
 	  
 	  afterRender: function() {

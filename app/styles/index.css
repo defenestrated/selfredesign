@@ -53,8 +53,10 @@
 	top: 0;
 }
 
+.header { display: none; }
+
 .nav {
-	display: none;
+	background: rgba(255,0,0,0.3);
 }
 
 .home {

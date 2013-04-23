@@ -30,12 +30,7 @@ function(app, Cartofolio) {
 			
 			app.layouts.nav = new pageView({
 				template: "nav",
-				className: "nav",
-				afterRender: function() {
-					if (!$(".nav").is(":visible")) {
-						$(".nav").fadeIn("slow");
-					}
-				}
+				className: "nav"
 			});
 			app.layouts.home = new pageView({
 				template: "home",
@@ -89,17 +84,15 @@ function(app, Cartofolio) {
 	},
 	contact: function() {
 		console.log("contact route");
-		app.layouts.mondo.setView(".nav", app.layouts.nav).render();
-		app.layouts.mondo.setView(".container", app.layouts.contact).render();
+		switchTo( app.layouts.contact )
 	},
 	resumes: function() {
 		console.log("resumes route");
-		app.layouts.mondo.setView(".nav", app.layouts.nav).render();
-		app.layouts.mondo.setView(".container", app.layouts.resumes).render();
+		switchTo( app.layouts.resumes )
 	},
 	
 	debug: function() {
-		$(".nav").fadeOut("slow");
+/* 		$(".nav").fadeOut("slow"); */
 		$(".debug").text('elders models:');
 		console.log(_(Cartofolio.elders.models).map(function (model) {
 				return model.get("title");
@@ -165,86 +158,36 @@ function(app, Cartofolio) {
 		
 		console.log(":: switching to " + newlayout.className);
 		
-		if (newlayout.className == "home") { // GOING TO HOME PAGE
-			
-			
-			/* !BROKEN */
-			
-			// spits out dom exception 3 - probably it can be fixed
-			// by cleaning up the hierarchy and just fading out and in a single entire meta-container.
-			
-			if ($(".nav").length) {
-				$(".nav").fadeOut("slow");
-			}
-			if ($(".container").length) {
-				$(".container").fadeOut("slow", function () {
-					app.layouts.mondo.setView(".container", newlayout).render().done(function () {
-						$(".container").fadeIn("slow");
-					});
-				});	
+		if (newlayout.className != "home") {
+			if ( $(".header").is(":visible") ) {
+				app.layouts.mondo.setView(".header", app.layouts.nav).render();
 			}
 			
 			else {
-				app.layouts.mondo.setView(".container", newlayout).render().done(function () {
-					$(".container").fadeIn("slow");
+				app.layouts.mondo.setView(".header", app.layouts.nav).render().done(function () {
+					$(".header").fadeIn("fast");
 				});
 			}
 		}
-		
-		else { // NOT GOING TO HOME PAGE
-			if ($(".container").length) {
-				$(".container").fadeOut("slow", function () {
-					app.layouts.mondo.setView(".nav", app.layouts.nav).render();
-					app.layouts.mondo.setView(".container", newlayout).render().done(function () {
-						$(".container").fadeIn("slow");
-					});
-				});				
-			}
-			
-			else {
-				app.layouts.mondo.setView(".container", newlayout).render().done(function () {
-					$(".container").fadeIn("slow");
-				});
+		else if (newlayout.className == "home") {
+			if ( $(".header").is(":visible") ) {
+				$(".header").fadeOut("fast");
 			}
 		}
 		
-				
-		/*
-if ($(".container").length) {
-			// container exists
-			if (typeof newlayout.attributes !== "undefined") {
-				if (newlayout.attributes.name != "home") {
-					$(".container").fadeOut("slow", function(){
-						app.layouts.mondo.setView(".nav", app.layouts.nav).render();
-						
-				}
-			}
-			
-			else {
-				if ($(".nav").length) { // kill nav bar on home page
-					$(".nav").fadeOut("slow");
-				}
-			}
-			$(".container").fadeOut("slow", function(){
-						app.layouts.mondo.setView(".nav", app.layouts.nav).render();
-					else {
-						if ($(".nav").length) { // kill nav bar on home page
-							$(".nav").fadeOut("slow");
-						}
-					}
-				}
-				app.layouts.mondo.setView(".container", newlayout).render();
-				$(".container").fadeIn("slow");
+		if ($(".container").is(":visible")) {
+			$(".container").fadeOut("fast", function () {
+				app.layouts.mondo.setView(".container", newlayout).render().done(function () {
+					$(".container").fadeIn("fast");
+				});
 			});
 		}
+		
 		else {
-			// container doesn't exist
 			app.layouts.mondo.setView(".container", newlayout).render().done(function () {
-				$(".container").fadeIn("slow");
+				$(".container").fadeIn("fast");
 			});
 		}
-*/
-	
 	}
 
   return mainrouter;
