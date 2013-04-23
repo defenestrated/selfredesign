@@ -1,5 +1,7 @@
 Header set Access-Control-Allow-Origin http://localhost:8000
 
+AddType font/opentype .otf
+
 # Remove the trailing slash from routes
 DirectorySlash Off
 

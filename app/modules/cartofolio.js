@@ -80,6 +80,7 @@ function(app, Project, Controls) {
 			jq.eq(0).fadeIn("fast", function(){
 			    (jq=jq.slice(1)).length && shownext(jq);
 			});
+			app.moveContainer();
 		})($('div.name'));
 	  }
 	  

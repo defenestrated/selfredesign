@@ -30,7 +30,13 @@ function(app, Cartofolio) {
 			
 			app.layouts.nav = new pageView({
 				template: "nav",
-				className: "nav"
+				className: "nav",
+				beforeRender: function () {
+					var hh = $(".header").height();
+					var th = $(".nav ul li").height();
+					console.log(hh, th);
+					$(".nav ul li").css("padding-top", (hh-th)/2 + "px !important");
+				}
 			});
 			app.layouts.home = new pageView({
 				template: "home",
@@ -55,7 +61,7 @@ function(app, Cartofolio) {
 			});
 			app.layouts.carto = new Cartofolio.Views.Mapview({});
 			
-			app.layouts.mondo.insertView(app.layouts.debug).render();
+			//app.layouts.mondo.insertView(app.layouts.debug).render();
 
 			
 
@@ -169,6 +175,7 @@ function(app, Cartofolio) {
 				});
 			}
 		}
+		
 		else if (newlayout.className == "home") {
 			if ( $(".header").is(":visible") ) {
 				$(".header").fadeOut("fast");
@@ -178,6 +185,7 @@ function(app, Cartofolio) {
 		if ($(".container").is(":visible")) {
 			$(".container").fadeOut("fast", function () {
 				app.layouts.mondo.setView(".container", newlayout).render().done(function () {
+					app.moveContainer();
 					$(".container").fadeIn("fast");
 				});
 			});
@@ -185,9 +193,22 @@ function(app, Cartofolio) {
 		
 		else {
 			app.layouts.mondo.setView(".container", newlayout).render().done(function () {
+				app.moveContainer();
 				$(".container").fadeIn("fast");
 			});
 		}
+	}
+	
+	app.moveContainer = function() {
+		var ww = $(window).width();
+		var wh = $(window).height();
+		var tw = $(".container").width();
+		var th = $(".container").height();
+		
+		console.log(ww, wh, tw, th);
+		
+		$(".container").css("left", (ww-tw)/2 + "px");
+		$(".container").css("top", (wh-th)/2 + "px");
 	}
 
   return mainrouter;

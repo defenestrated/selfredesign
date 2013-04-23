@@ -9,58 +9,125 @@
 
 /* !-------------   mondo   --------------- */
 @font-face {
-			font-family: FuturaBk;
-			src: url("fonts/futBk.otf");
+	font-family: FuturaBk;
+	src: url("../../assets/fonts/futBk.otf");
 }
 @font-face {
 	font-family: FuturaBk;
 	font-style: italic;
-	src: url("fonts/futBkObl.otf");
+	src: url("../../assets/fonts/futBkObl.otf");
 }
 @font-face {
 	font-family: Futura;
-	src: url("fonts/futMed.otf");
-}
-@font-face {
-	font-family: Futura;
-	font-style: italic;
-	src: url("fonts/futMedObl.otf");
-}
-@font-face {
-	font-family: Futura;
-	font-weight: bold;
-	src: url("fonts/futHeavy.otf");
+	src: url("../../assets/fonts/futMed.otf");
 }
 @font-face {
 	font-family: Futura;
 	font-style: italic;
+	src: url("../../assets/fonts/futMedObl.otf");
+}
+@font-face {
+	font-family: Futura;
 	font-weight: bold;
-	src: url("fonts/futHeavyObl.otf");
+	src: url("../../assets/fonts/futHeavy.otf");
+}
+@font-face {
+	font-family: Futura;
+	font-style: italic;
+	font-weight: bold;
+	src: url("../../assets/fonts/futHeavyObl.otf");
+}
+
+a { 
+	color: black; 
+	text-decoration: none;
+	font: normal normal 13px/1.2em "Futura", "Lucida Console", monospace;
+	letter-spacing: 0.3em;
+	-webkit-transition:color .1s ease-in-out;  
+   	-moz-transition:color .1s ease-in-out;  
+   	-o-transition:color .1s ease-in-out;  
+   	transition:color .1s ease-in-out;
+
+}
+a:hover { color: white }
+a:active { color: red }
+
+html {
+	background: url("../../assets/images/cloudgrain_big.png") no-repeat center center fixed; 
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover;
 }
 
 #mondo {
-	background: rgba(0,0,0,0.2);
 	position: absolute;
-	width: 100%;
 	left: 0;
 	top: 0;
+	width: 100%;
+	height: 100%;
 }
 .container {
 	display: none;
-	border: 1px solid black;
-	width: 100%;
+	position: absolute;
+	font: normal normal 12px/1.2em "FuturaBk", "Lucida Console", monospace;
+	color: black;
+	letter-spacing: 0.15em;
+/* 	border: 1px solid rgba(0,0,0,0.05); */
 	left: 0;
 	top: 0;
 }
 
-.header { display: none; }
+.header { 
+	display: none;
+	
+	white-space: nowrap;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	background: rgba(0,0,0,0.7);
+}
 
 .nav {
 	background: rgba(255,0,0,0.3);
+	font: normal normal 12px/1.2em "FuturaBk", "Lucida Console", monospace;
 }
 
-.home {
-	background: rgba(0,0,255,0.3);
+a.logo {
+	font: normal normal 24px/2em "FuturaBk", "Lucida Console", monospace;
+	color: rgb(175,175,175);
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	text-decoration: none;
+	padding-left: 1em;
+	float: left;
+}
+
+.nav ul {
+	list-style-type: none;
+	-webkit-margin-before: 0px;
+	-webkit-margin-after: 0px;
+	-webkit-margin-start: 0px;
+	-webkit-margin-end: 0px;
+	-webkit-padding-start: 0px;
+}
+
+.nav ul li {
+	float: left;
+	padding: 1.35em 2em;
+	margin-left: 3em;
+}
+
+.nav a {
+	color: rgb(175,175,175);
+	-webkit-transition:color .1s ease-in-out;  
+   	-moz-transition:color .1s ease-in-out;  
+   	-o-transition:color .1s ease-in-out;  
+   	transition:color .1s ease-in-out;
+}
+.nav a:hover {
+	color: white;
 }
 
 .debug {
@@ -76,7 +143,44 @@
 
 /* !-------------   home   --------------- */
 
+.home {
+	white-space: nowrap;
+	text-align: center;
+}
 
+.home a { 
+	color: black; 
+	text-decoration: none;
+	font: normal normal 16px/1.2em "Futura", "Lucida Console", monospace;
+	letter-spacing: 0.12em;
+}
+.home a:hover { color: white }
+.home a:active { color: red }
+
+.home ul {
+	/* kill native css */
+	list-style-type: none;
+	-webkit-margin-before: 0px;
+	-webkit-margin-after: 0px;
+	-webkit-margin-start: 0px;
+	-webkit-margin-end: 0px;
+	-webkit-padding-start: 0px; 
+	
+	margin-top: 30px;
+}
+
+.home li {
+	list-style: none;
+	padding: 10px 0;
+}
+
+a.homelogo {
+	font: normal normal 30px/1.2em "Futura", "Lucida Console", monospace;
+	color: black;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	text-decoration: none;
+}
 
 /* !-------------   projects   --------------- */
 
