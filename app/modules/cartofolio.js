@@ -73,7 +73,16 @@ function(app, Project, Controls) {
 	  	var lay = this;
 	  	
 		_.each(Cartofolio.elders.models, function(model) { // append divs to the DOM
-			lay.$el.append("<div class='name' id='" + model.get("slug") + "'>" + model.get("title") + "</div>");
+			
+			lay.$el
+				.append("<div class='skelback'><div class='skelproj' id='" + model.get("slug") + "'></div></div>");
+				$("#" + model.get("slug")).css("background", 'url("' + model.get("thumbnail") + '") no-repeat center center')
+					.css("-webkit-background-size", "cover")
+					.css("-moz-background-size", "cover")
+					.css("-o-background-size", "cover")
+					.css("background-size", "cover");
+					
+				$("#" + model.get("slug")).html('<h1>'+ model.get("title") + '</h1><h2>' + model.get("date") + '</h2>');
 		});
 		
 		(function shownext(jq){
@@ -81,7 +90,7 @@ function(app, Project, Controls) {
 			    (jq=jq.slice(1)).length && shownext(jq);
 			});
 			app.moveContainer();
-		})($('div.name'));
+		})($('div.skelproj'));
 	  }
 	  
 	  
