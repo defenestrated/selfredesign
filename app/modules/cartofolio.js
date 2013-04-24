@@ -90,7 +90,7 @@ function(app, Project, Controls) {
 			    (jq=jq.slice(1)).length && shownext(jq);
 			});
 			app.moveContainer();
-		})($('div.skelproj'));
+		})($('div.skelback'));
 	  }
 	  
 	  

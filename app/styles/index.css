@@ -185,7 +185,6 @@ a.homelogo {
 /* !-------------   projects   --------------- */
 
 .skelproj {
-	display: none;
 	float: left;
 	width: 200px;
 	height: 200px;
@@ -224,6 +223,7 @@ a.homelogo {
 }
 
 .skelback {	
+	display: none;
 	float: left;
 	width: 200px;
 	height: 200px;
