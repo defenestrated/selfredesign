@@ -1,16 +1,17 @@
 define([
   // Application.
   "app",
-  "modules/cartofolio"
+  "modules/cartofolio",
+  "modules/project"
 ],
 
-function(app, Cartofolio) {
+function(app, Cartofolio, Project) {
 
   // Defining the application router, you can attach sub routers here.
 	var mainrouter = Backbone.Router.extend({
 
 		initialize: function () {
-
+			
 			app.layouts.mondo = new Backbone.Layout({
 		  		template: "mondo",
 		  		el: "body"
@@ -62,8 +63,13 @@ function(app, Cartofolio) {
 			app.layouts.carto = new Cartofolio.Views.Mapview({});
 			
 			//app.layouts.mondo.insertView(app.layouts.debug).render();
-
 			
+			Cartofolio.elders.on("reset", function () {
+				app.projviews = _(Cartofolio.elders.models).map(function ( model ) {
+					return new Cartofolio.Views.Single({ model: model });
+				});
+				app.trigger("viewsready");
+			});
 
 		},
 		
@@ -74,6 +80,7 @@ function(app, Cartofolio) {
 		"contact": "contact",
 		"resumes": "resumes",
 		"debug": "debug",
+		"projects/:proj": "single",
 		"": "index",
 		"*splat": "splatter"
 	},
@@ -97,6 +104,33 @@ function(app, Cartofolio) {
 		switchTo( app.layouts.resumes )
 	},
 	
+	single: function (project) {
+		console.log("single project route for " + project);
+		
+		app.on("viewsready", function () {
+			console.log("views are ready");
+			console.log(app.projviews);
+			var singleview;
+			_(app.projviews).map(function ( view ) {
+				console.log("..........." + view.model.get("slug"));
+				if (view.model.get("slug") == project) {
+					console.log("found model: " + view.model.get("slug") + "!");
+					singleview = view;
+				}
+			});
+			if (typeof singleview !== "undefined") {
+				console.log(singleview);
+			}
+			else {
+				console.log("no singleview");
+				
+/* 				! BROKEN */
+				//figure out why this doesn't work:
+				mainrouter.navigate("", {trigger: true});
+			}
+		});
+	},
+	
 	debug: function() {
 /* 		$(".nav").fadeOut("slow"); */
 		$(".debug").text('elders models:');
@@ -114,7 +148,7 @@ function(app, Cartofolio) {
 	},
 
 	splatter: function (splat) {
-		console.log("splat");
+		console.log("splat: " + splat);
 		this.navigate("", { trigger: true });
 	}
 

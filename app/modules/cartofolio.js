@@ -28,14 +28,16 @@ function(app, Project, Controls) {
 	});
 	Cartofolio.elders.reset(elds);
 	Cartofolio.elders.trigger("greenlight");
+	
+	
 /* 	app.mainrouter.navigate("debug", { trigger: true }); */
   }
 
-/*   Cartofolio.elders.on("add", function() {console.log("done loading")} ); */
-
-  // Default View.
-  
   Cartofolio.Views = {};
+  
+  
+/* ! ==== SKELETON VIEW ==== */  
+  
   
   Cartofolio.Views.Skeletonview = Backbone.Layout.extend({
 	  
@@ -126,7 +128,11 @@ function(app, Project, Controls) {
 	  
   });
   
-	Cartofolio.Views.Mapview = Backbone.Layout.extend({
+
+/* !==== MAP VIEW ==== */
+  
+  
+  Cartofolio.Views.Mapview = Backbone.Layout.extend({
 		
 		template: "cartofolio",
 		className: "cartofolio_parchment",
@@ -464,6 +470,22 @@ function(app, Project, Controls) {
 	},
 		
 	});
+
+
+/* !==== SINGLE VIEW ==== */
+
+  Cartofolio.Views.Single = Backbone.Layout.extend({
+	  
+	  template: "single",
+	  className: "single",
+	  
+	  initialize: function (model) {
+		  console.log(">> single init: " + this.model.get("title"));
+	  }
+	  
+	  
+  });
+
 
   // Return the module for AMD compliance.
   return Cartofolio;
