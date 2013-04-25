@@ -72,6 +72,8 @@ function(app, Project, Controls) {
 	  showprojects: function() {
 	  	var lay = this;
 	  	
+	  	app.skelContainer();
+	  	
 		_.each(Cartofolio.elders.models, function(model) { // append divs to the DOM
 			
 			lay.$el
@@ -81,19 +83,46 @@ function(app, Project, Controls) {
 					.css("-moz-background-size", "cover")
 					.css("-o-background-size", "cover")
 					.css("background-size", "cover");
-					
-				$("#" + model.get("slug")).html('<h1>'+ model.get("title") + '</h1><h2>' + model.get("date") + '</h2>');
+				
+				
+				var m_names = new Array("January", "February", "March", 
+				"April", "May", "June", "July", "August", "September", 
+				"October", "November", "December");
+				
+				var modeldate = new Date(model.get("date"));
+				var month = m_names[modeldate.getMonth()];
+				var year = modeldate.getFullYear();
+				var fulldate = month + ", " + year;
+				
+				var materials = _(model.get("materials")).map(function (item) {
+					return " " + item;
+				});
+				// add content
+				$("#" + model.get("slug")).html('<h1>'+ model.get("title") + '</h1><h2>' + fulldate + '</h2><h2>' + materials + '</h2>');
 		});
+
+/* !---- mouse behavior stuff ---- */
+
+	  	$(".skelback").mouseenter(function () {
+	  		$(this).animate({"background-color": "rgba(0,0,0,0.7)"}, 100, "easeInQuad");
+	  		$(this).children(".skelproj").animate({"color": "rgb(251,255,103)"}, 100, "easeInQuad");
+	  	});
+	  	$(".skelback").mouseleave(function () {
+	  		$(this).animate({"background-color": "rgba(0,0,0,0.5)"}, 100, "easeInQuad");
+	  		$(this).children(".skelproj").animate({"color": "white"}, 400, "easeInQuad");
+	  	});
+	  	
 		
+/* !---- cyclical project fades ---- */
+		var count = 0;
 		(function shownext(jq){
-			jq.eq(0).fadeIn("fast", function(){
+			jq.eq(0).fadeIn(300, "easeInQuad", function(){
+				$(".skelproj").eq(count).fadeIn(600, "easeInQuad");
 			    (jq=jq.slice(1)).length && shownext(jq);
+			    count++;
 			});
-			app.moveContainer();
 		})($('div.skelback'));
 	  }
-	  
-	  
 	  
   });
   

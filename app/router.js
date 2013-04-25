@@ -63,9 +63,7 @@ function(app, Cartofolio) {
 			
 			//app.layouts.mondo.insertView(app.layouts.debug).render();
 
-			$(window).on("resize", function () {
-				app.moveContainer();
-			});
+			
 
 		},
 		
@@ -154,6 +152,15 @@ function(app, Cartofolio) {
 		
 		initialize: function () {
 			
+			$(window).resize(function() {
+			   if ( $(".container").find($(".skeleton")).length ) {
+	        	app.skelContainer();
+        	}
+        	else {
+        		app.moveContainer();
+        	}
+			});
+			
 			this.collection.on("reset", function () {
 				//console.log("elders reset");
 			});
@@ -173,30 +180,30 @@ function(app, Cartofolio) {
 			
 			else {
 				app.layouts.mondo.setView(".header", app.layouts.nav).render().done(function () {
-					$(".header").fadeIn("fast");
+					$(".header").fadeIn(600, "easeInQuad");
 				});
 			}
 		}
 		
 		else if (newlayout.className == "home") {
 			if ( $(".header").is(":visible") ) {
-				$(".header").fadeOut("fast");
+				$(".header").fadeOut(1000, "easeInQuad");
 			}
 		}
 		
 		if ($(".container").is(":visible")) {
 			$(".container").fadeOut("fast", function () {
 				app.layouts.mondo.setView(".container", newlayout).render().done(function () {
-					app.moveContainer();
-					$(".container").fadeIn("fast");
+					(newlayout.className == "skeleton") ? app.skelContainer() : app.moveContainer();
+					$(".container").fadeIn(600, "easeInQuad");
 				});
 			});
 		}
 		
 		else {
 			app.layouts.mondo.setView(".container", newlayout).render().done(function () {
-				app.moveContainer();
-				$(".container").fadeIn("fast");
+				(newlayout.className == "skeleton") ? app.skelContainer() : app.moveContainer();
+				$(".container").fadeIn(600, "easeInQuad");
 			});
 		}
 	}
@@ -204,13 +211,22 @@ function(app, Cartofolio) {
 	app.moveContainer = function() {
 		var ww = $(window).width();
 		var wh = $(window).height();
+		$(".container").css("width", "auto");
 		var tw = $(".container").width();
 		var th = $(".container").height();
 		
 /* 		console.log(ww, wh, tw, th); */
 		
+		
 		$(".container").css("left", (ww-tw)/2 + "px");
 		$(".container").css("top", (wh-th)/2 + "px");
+	}
+	
+	app.skelContainer = function () {
+		var buffer = 20;
+	  	$(".container").css("width", $(window).width()-buffer*2);
+	  	$(".container").css("left", buffer);
+	  	$(".container").css("top", ($(".header").outerHeight() + buffer) + "px");
 	}
 
   return mainrouter;

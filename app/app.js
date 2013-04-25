@@ -1,7 +1,8 @@
 define([
   "backbone.layoutmanager",
   "plugins/d3",
-  "plugins/modernizr"
+  "plugins/modernizr",
+  "plugins/jquery-ui/jqueryui/effect"
 ], function() {
 
   // Provide a global location to place configuration settings and module

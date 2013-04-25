@@ -73,7 +73,7 @@ html {
 	font: normal normal 12px/1.2em "FuturaBk", "Lucida Console", monospace;
 	color: black;
 	letter-spacing: 0.15em;
-/* 	border: 1px solid rgba(0,0,0,0.05); */
+/* 	border: 1px solid rgba(0,0,0,0.1); */
 	left: 0;
 	top: 0;
 }
@@ -174,7 +174,7 @@ a.logo {
 	padding: 10px 0;
 }
 
-a.homelogo {
+.homelogo {
 	font: normal normal 30px/1.2em "Futura", "Lucida Console", monospace;
 	color: black;
 	text-transform: uppercase;
@@ -184,10 +184,22 @@ a.homelogo {
 
 /* !-------------   projects   --------------- */
 
-.skelproj {
+.skelback {	
+	display: none;
+	cursor: pointer;
 	float: left;
-	width: 200px;
-	height: 200px;
+	width: 250px;
+	height: 250px;
+	border: 4px solid black;
+	margin: 0 -4px -4px 0;
+	background-color: rgba(0,0,0,0.5);
+}
+
+.skelproj {
+	display: none;
+	float: left;
+	width: 100%;
+	height: 100%;
 	color: white;
 }
 
@@ -214,30 +226,12 @@ a.homelogo {
 	-webkit-margin-end: 0px;
 	-webkit-padding-start: 0px; 
 	
-	font-size: 10px;
+	font-size: 11px;
 	line-height: 1.2em;
 	font-weight: normal;
 	letter-spacing: 0.2em;
-	text-transform: uppercase;
+	text-transform: lowercase;
 	padding: 10px;
-}
-
-.skelback {	
-	display: none;
-	float: left;
-	width: 200px;
-	height: 200px;
-	border: 4px solid black;
-	margin: 0 -4px -4px 0;
-	background-color: rgba(0,0,0,0.3);
-	-webkit-transition:all .1s ease-in-out;  
-   	-moz-transition:all .1s ease-in-out;  
-   	-o-transition:all .1s ease-in-out;  
-   	transition:all .1s ease-in-out;
-	
-}
-.skelback:hover {
-	background-color: rgba(0,0,0,0.6);
 }
 
 /* !-------------   svg   --------------- */
