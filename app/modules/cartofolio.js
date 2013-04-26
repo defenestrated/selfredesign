@@ -87,20 +87,11 @@ function(app, Project, Controls) {
 					.css("background-size", "cover");
 				
 				
-				var m_names = new Array("January", "February", "March", 
-				"April", "May", "June", "July", "August", "September", 
-				"October", "November", "December");
+				var date = app.fixDate(model);
+				var materials = app.fixList(model, "materials");
 				
-				var modeldate = new Date(model.get("date"));
-				var month = m_names[modeldate.getMonth()];
-				var year = modeldate.getFullYear();
-				var fulldate = month + ", " + year;
-				
-				var materials = _(model.get("materials")).map(function (item) {
-					return " " + item;
-				});
 				// add content
-				$("#" + model.get("slug")).html('<h1>'+ model.get("title") + '</h1><h2>' + fulldate + '</h2><h2>' + materials + '</h2>');
+				$("#" + model.get("slug")).html('<h1>'+ model.get("title") + '</h1><h2>' + date + '</h2><h2>' + materials + '</h2>');
 		});
 
 /* !---- mouse behavior stuff ---- */
@@ -475,17 +466,41 @@ function(app, Project, Controls) {
 /* !==== SINGLE VIEW ==== */
 
   Cartofolio.Views.Single = Backbone.Layout.extend({
-	  
-	  template: "single",
-	  className: "single",
-	  
-	  initialize: function (model) {
-		  console.log(">> single init: " + this.model.get("title"));
-	  }
-	  
-	  
+	
+	template: "single",
+	className: "single",
+	
+	initialize: function (model) {
+	
+	var lay = this;
+	console.log(">> single init: " + this.model.get("title"));
+	
+	},
+	
+	afterRender: function () {
+		var lay = this;
+		var model = this.model;
+		
+		lay.$el
+		.append('<div class="sidebar"></div>');
+		
+		$(".sidebar").append("<table class='sidetable' cellspacing='0' cellpadding='0'></table>");
+		
+		$("table.sidetable")
+			.append('<tr><th>' + model.get("title") + '<th></tr>')
+			.append('<tr><td>' + app.fixDate(model) + '</td></tr>')
+			.append('<tr><td>took ' + model.get("hours") + ' hours of work</td></tr>')
+			.append('<tr><td>made with ' + app.fixList(model, "materials") + '</td></tr>')
+			.append('<tr><td>used ' + app.fixList(model, "techniques") + '</td></tr>')
+			.append('<tr><td>occupies ' + model.get("dimensions") + ' dimensions</td></tr>')
+			.append('<tr><td>takes up ' + app.fixScale(model) + '</td></tr>')
+			.append('<tr><td>made ' + app.fixList(model, "reasons") + '</td></tr>')
+		;
+		app.skelContainer();
+	}
+	
+	
   });
-
 
   // Return the module for AMD compliance.
   return Cartofolio;

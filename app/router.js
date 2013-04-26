@@ -119,14 +119,12 @@ function(app, Cartofolio, Project) {
 				}
 			});
 			if (typeof singleview !== "undefined") {
-				console.log(singleview);
+				switchTo( singleview );
 			}
 			else {
 				console.log("no singleview");
-				
-/* 				! BROKEN */
-				//figure out why this doesn't work:
-				mainrouter.navigate("", {trigger: true});
+				var newrouter = new Backbone.Router({});
+				newrouter.navigate("", {trigger: true});
 			}
 		});
 	},
@@ -187,7 +185,7 @@ function(app, Cartofolio, Project) {
 		initialize: function () {
 			
 			$(window).resize(function() {
-			   if ( $(".container").find($(".skeleton")).length ) {
+			   if ( $(".container").find($(".skeleton")).length || $(".container").find($(".single")).length ) {
 	        	app.skelContainer();
         	}
         	else {
@@ -259,8 +257,50 @@ function(app, Cartofolio, Project) {
 	app.skelContainer = function () {
 		var buffer = 20;
 	  	$(".container").css("width", $(window).width()-buffer*2);
+	  	$(".container").css("height", ($(window).height()-$(".header").outerHeight())-buffer*2);
 	  	$(".container").css("left", buffer);
 	  	$(".container").css("top", ($(".header").outerHeight() + buffer) + "px");
+	  	
+	  	if ($(".container").find($(".single")).length) {
+		  	$(".sidebar").css("width", $(".container").width()/4 + "px");
+			$(".sidebar").css("height", $(".container").height() + "px");
+			
+			
+			var available = $(".sidebar").height() - $(".sidebar th").outerHeight();
+			console.log("available: " + available);
+			
+			console.log(available/$(".sidebar td").length);
+			$(".sidebar td").css("height", available/$(".sidebar td").length + "px");
+/*
+			$(".sidebar td").each(function ( index ) {
+				if (index%2 == 0) $(this).css("background-color", "red");
+			})
+*/
+	  	}
+	}
+	
+	app.fixDate = function ( model ) {
+		var m_names = new Array("January", "February", "March", 
+		"April", "May", "June", "July", "August", "September", 
+		"October", "November", "December");
+		
+		var modeldate = new Date(model.get("date"));
+		var month = m_names[modeldate.getMonth()];
+		var year = modeldate.getFullYear();
+		var fulldate = month + ", " + year;
+		return fulldate;
+	}
+	
+	app.fixList = function ( model, attribute ) {
+		var list = _(model.get(attribute)).map(function (item) {
+			return " " + item;
+		});
+		return list;
+	}
+	
+	app.fixScale = function ( model ) { 
+		if (model.get("scale") == 1) return model.get("scale") + " cubic foot";
+		else return model.get("scale") + " cubic feet";
 	}
 
   return mainrouter;
