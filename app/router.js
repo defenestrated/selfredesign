@@ -10,12 +10,13 @@ function(app, Cartofolio, Project) {
 	app.rtime = new Date(1, 1, 2000, 12,00,00);
 	app.timeout = false;
 	app.delta = 200;
+	app.prevsize;
+	app.currsize = "big";
 	
   // Defining the application router, you can attach sub routers here.
 	var mainrouter = Backbone.Router.extend({
 
 		initialize: function () {
-			console.log(app.rtime);
 			app.layouts.mondo = new Backbone.Layout({
 		  		template: "mondo",
 		  		el: "body"
@@ -98,7 +99,6 @@ function(app, Cartofolio, Project) {
 		console.log("carto route");
 		app.layouts.mondo.setView(".container", app.layouts.carto).render();			
 	},
-	
 	skeleton: function() {
 		console.log("skeleton route");
 		switchTo( app.layouts.skel );
@@ -112,7 +112,6 @@ function(app, Cartofolio, Project) {
 		console.log("resumes route");
 		switchTo( app.layouts.resumes )
 	},
-	
 	single: function (project) {
 		console.log("single project route for " + project);
 		if (project == "skeleton") this.navigate("skeleton", {trigger: true});
@@ -126,16 +125,13 @@ function(app, Cartofolio, Project) {
 			}	
 		}
 	},
-	
 	debug: function() {
 		app.skelContainer();
 	},
-	
 	index: function() {
 		console.log("index route called.");
 		switchTo( app.layouts.home );
 	},
-
 	splatter: function (splat) {
 		console.log("splat: " + splat);
 		this.navigate("", { trigger: true });
@@ -191,13 +187,16 @@ function(app, Cartofolio, Project) {
 		console.log(":: switching to " + newlayout.className);
 		
 		if (newlayout.className != "home") {
-		
+			if ( $(".nav").length ) {
+        		app.navSizeCheck();
+        	}
 			
 			if ( $(".header").is(":visible") ) {
 				app.layouts.mondo.setView(".header", app.layouts.nav).render().done(function() {
+					
 					$("a." + newlayout.className).css("color", "white");
 					if (newlayout.className == "single") {
-						$("a.skeleton").text("back to projects");
+						$("a.skeleton").text("back to the list of projects");
 					}
 					
 				});
@@ -207,13 +206,13 @@ function(app, Cartofolio, Project) {
 				app.layouts.mondo.setView(".header", app.layouts.nav).render().done(function () {
 					$("a." + newlayout.className).css("color", "white");
 					if (newlayout.className == "single") {
-						$("a.skeleton").text("back to projects");
+						$("a.skeleton").text("back to the list of projects");
 					}
 					
 					$(".header").fadeIn(600, "easeInQuad", function () {
 						$("a." + newlayout.className).css("color", "white");
 						if (newlayout.className == "single") {
-							$("a.skeleton").text("back to projects");
+							$("a.skeleton").text("back to the list of projects");
 						}
 						
 					});
@@ -233,6 +232,7 @@ function(app, Cartofolio, Project) {
 					(newlayout.className == "skeleton" || newlayout.className == "single") ? app.skelContainer() : app.moveContainer();
 					$(".container").fadeIn(600, "easeInQuad");
 				});
+				
 			});
 		}
 		
@@ -265,14 +265,22 @@ function(app, Cartofolio, Project) {
 		var ww = $(window).width();
 		var wh = $(window).height();
 		
-		if (ww/wh < 1 || $(".header").outerHeight() > 75) {
+		if ($(window).width() < 875) {
+			app.currsize = "little";
+			
 			$(".container").css("width", "100%");
 			$(".container").css("text-align", "center");
 			$(".container").css("height", "auto");
+			
+			
 		}
 		else {
+			app.currsize = "big";
+			
 			$(".container").css("width", "auto");
 			$(".container").css("height", "auto");
+			
+			
 		}
 		
 		var tw = $(".container").width();
@@ -297,7 +305,8 @@ function(app, Cartofolio, Project) {
 	  	
 	  	if ($(".container").find($(".single")).length) {
 	  		
-	  		if (ww/wh < 1 || $(".header").outerHeight() > 75) {
+	  		if ($(window).width() < 1000) {
+	  			app.currsize = "little";
 		  		
 	  			$(".sidebar").css("width", $(".container").width()/3 + "px");
 		  		$(".sidebar").css("height", "auto");
@@ -310,9 +319,6 @@ function(app, Cartofolio, Project) {
 				$(".sidebar td").css("font-size", "10px");
 				$(".sidebar th").css("font-size", "20px");
 			
-				
-				
-				
 				$(".mainstage").css("left", $(".container").width()/2 + "px");
 				
 				var msw = $(".container").width()-$(".sidebar").outerWidth();
@@ -322,10 +328,12 @@ function(app, Cartofolio, Project) {
 				else if (msw <= 400) newwidth = 400;
 				$(".mainstage").css("height", $(".container").height() + "px");
 				$(".mainstage").css("width", newwidth + "px");
+				
 	  		}
+	  		
 	  		else {
-		  		var sbw;
-		  		if ($(".container").width()/4 < 300) $(".sidebar").css("width", "300px");
+	  			app.currsize = "big";	  					  				
+				if ($(".container").width()/4 < 300) $(".sidebar").css("width", "300px");
 		  		else if ($(".container").width()/4 >= 300) $(".sidebar").css("width", $(".container").width()/4 + "px");
 		  		
 		  		
@@ -351,6 +359,7 @@ function(app, Cartofolio, Project) {
 				else if (msw <= 400) newwidth = 400;
 				$(".mainstage").css("height", $(".container").height() + "px");
 				$(".mainstage").css("width", newwidth + "px");
+	  							
 	  		}
 	  	}
 	}
@@ -366,26 +375,30 @@ function(app, Cartofolio, Project) {
 		var fulldate = month + ", " + year;
 		return fulldate;
 	}
-	
 	app.fixList = function ( model, attribute ) {
 		var list = _(model.get(attribute)).map(function (item) {
 			return " " + item;
 		});
 		return list;
 	}
-	
 	app.fixScale = function ( model ) { 
 		if (model.get("scale") == 1) return model.get("scale") + " cubic foot";
 		else return model.get("scale") + " cubic feet";
 	}
 	
 	app.navSizeCheck = function () {
-		if ($(window).width()/$(window).height() < 1 || $(".header").outerHeight() > 75) {
+		
+		if ($(".container").find($(".single")).length) amt = 1000;
+		else if (!$(".container").find($(".single")).length) amt = 875;
+		
+		if ($(window).width() < amt && app.prevsize != "little") {
+			app.currsize = "little";
 			$(".nav ul").fadeOut(300, "easeInOutQuad", function () {
 				$("a.logo").css("float", "none");
 				$(".nav ul li").css("padding", "0 0 1em 0");
 				$(".nav ul li a").css("font-size", "12px");
 				$(".nav ul li").css("margin-left", "19px");
+				$(".nav ul li").css("margin-right", "50px");
 				$(".nav ul").fadeIn(300, "easeInOutQuad");
 				$("a.logo").animate({"font-size": "18px"}, 300, "easeInOutQuad", function () {
 					if ( $(".container").find($(".skeleton")).length || $(".container").find($(".single")).length ) {
@@ -393,9 +406,18 @@ function(app, Cartofolio, Project) {
 		        	}
 				});
 			});
-			
+			app.prevsize = "little";
 		}
-		else {
+		else if ($(window).width() < amt && app.prevsize == "little") {
+			$("a.logo").css("float", "none");
+			$(".nav ul li").css("padding", "0 0 1em 0");
+			$(".nav ul li a").css("font-size", "12px");
+			$(".nav ul li").css("margin-left", "19px");
+			$(".nav ul li").css("margin-right", "50px");
+			$("a.logo").css("font-size", "18px");
+		}
+		else if ($(window).width() > amt && app.prevsize != "big"){
+			app.currsize = "big";
 			$(".nav ul").fadeOut(300, "easeInOutQuad", function () {
 				$("a.logo").css("float", "");
 				$(".nav ul li").css("padding", "");
@@ -409,6 +431,7 @@ function(app, Cartofolio, Project) {
 				});
 				
 			});
+			app.prevsize = "big";
 		}		
 	}
 	
@@ -418,7 +441,6 @@ function(app, Cartofolio, Project) {
 	        setTimeout(app.resizeend, app.delta);
 	    } else {
 	        app.timeout = false;
-	        console.log("done resizing");
 	        if ( $(".container").find($(".skeleton")).length || $(".container").find($(".single")).length ) {
 	       	 	app.skelContainer();
         	}

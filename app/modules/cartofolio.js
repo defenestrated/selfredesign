@@ -97,6 +97,7 @@ function(app, Project, Controls) {
 					somerouter.navigate('projects/' + model.get("slug"), {trigger:true});
 				});
 		});
+		$(".skeleton").css("height", $(".container").height()+4 + "px");
 
 /* !---- mouse behavior stuff ---- */
 

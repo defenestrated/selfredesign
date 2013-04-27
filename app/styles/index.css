@@ -76,7 +76,7 @@ p {
 	height: 100%;
 }
 .container {
-	border: 1px solid rgba(0,0,0,0.3);
+/* 	border: 1px solid rgba(0,0,0,0.3); */
 
 	display: none;
 	position: absolute;
@@ -194,6 +194,9 @@ a.logo {
 
 /* !-------------   projects   --------------- */
 
+.skeleton {
+	overflow: auto;
+}
 
 .skelback {	
 	display: none;
