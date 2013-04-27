@@ -92,6 +92,10 @@ function(app, Project, Controls) {
 				
 				// add content
 				$("#" + model.get("slug")).html('<h1>'+ model.get("title") + '</h1><h2>' + date + '</h2><h2>' + materials + '</h2>');
+				$("#" + model.get("slug")).click(function () {
+					var somerouter = new Backbone.Router({});
+					somerouter.navigate('projects/' + model.get("slug"), {trigger:true});
+				});
 		});
 
 /* !---- mouse behavior stuff ---- */
@@ -473,7 +477,6 @@ function(app, Project, Controls) {
 	initialize: function (model) {
 	
 	var lay = this;
-	console.log(">> single init: " + this.model.get("title"));
 	
 	},
 	
@@ -482,7 +485,9 @@ function(app, Project, Controls) {
 		var model = this.model;
 		
 		lay.$el
-		.append('<div class="sidebar"></div>');
+			.append('<div class="sidebar"></div>')
+			.append('<div class="mainstage"></div>')
+		;
 		
 		$(".sidebar").append("<table class='sidetable' cellspacing='0' cellpadding='0'></table>");
 		
@@ -495,6 +500,11 @@ function(app, Project, Controls) {
 			.append('<tr><td>occupies ' + model.get("dimensions") + ' dimensions</td></tr>')
 			.append('<tr><td>takes up ' + app.fixScale(model) + '</td></tr>')
 			.append('<tr><td>made ' + app.fixList(model, "reasons") + '</td></tr>')
+		;
+		
+		$(".mainstage")
+			.append('<img class="content_thumb" src="' + model.get("thumbnail") + '"></img>')
+			.append('<div class="maincontent">' + model.get("content") + '</div>')
 		;
 		app.skelContainer();
 	}

@@ -60,6 +60,14 @@ html {
 	background-size: cover;
 }
 
+p {
+	-webkit-margin-before: 0px;
+	-webkit-margin-after: 0px;
+	-webkit-margin-start: 0px;
+	-webkit-margin-end: 0px;
+	margin-bottom: 1em;
+}
+
 #mondo {
 	position: absolute;
 	left: 0;
@@ -68,14 +76,16 @@ html {
 	height: 100%;
 }
 .container {
+/* 	border: 1px solid rgba(0,0,0,0.3); */
+
 	display: none;
 	position: absolute;
 	font: normal normal 12px/1.2em "FuturaBk", "Lucida Console", monospace;
 	color: black;
 	letter-spacing: 0.15em;
-	border: 1px solid rgba(0,0,0,0.1);
 	left: 0;
 	top: 0;
+	overflow: hidden;
 }
 
 .header { 
@@ -238,7 +248,8 @@ a.logo {
 
 
 .single .sidebar {
-	background: rgba(255,255,255,0.3);
+/* 	background: rgba(255,255,255,0.3); */
+	padding: 0 50px;
 }
 
 table {
@@ -248,7 +259,7 @@ table {
 .sidetable th {
 	text-align: left;
 	vertical-align: middle;
-	font-size: 24px;
+	font-size: 30px;
 	line-height: 1.2em;
 	font-weight: normal;
 	letter-spacing: 0.1em;
@@ -265,6 +276,32 @@ table {
 	letter-spacing: 0.1em;
 	text-transform: lowercase;
 	margin: 0;
+}
+
+.mainstage {
+/* 	background: rgba(0,0,0,0.3); */
+	position: absolute;
+	top: 0;
+	left: 0;
+	overflow: auto;
+}
+
+.content_thumb {
+	border: 5px solid black;
+	width: 100px;
+	height: 100px;
+	margin: 15px 20px 20px 0px;
+	float: left;
+}
+
+.maincontent {
+	padding-top: 15px;
+}
+
+.maincontent p {
+	font-size: 11px;
+	letter-spacing: .2em;
+	line-height: 1.2em;
 }
 
 

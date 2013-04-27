@@ -106,38 +106,20 @@ function(app, Cartofolio, Project) {
 	
 	single: function (project) {
 		console.log("single project route for " + project);
+		if (project == "skeleton") this.navigate("skeleton", {trigger: true});
 		
 		app.on("viewsready", function () {
-			console.log("views are ready");
-			console.log(app.projviews);
-			var singleview;
-			_(app.projviews).map(function ( view ) {
-				console.log("..........." + view.model.get("slug"));
-				if (view.model.get("slug") == project) {
-					console.log("found model: " + view.model.get("slug") + "!");
-					singleview = view;
-				}
-			});
-			if (typeof singleview !== "undefined") {
-				switchTo( singleview );
-			}
-			else {
-				console.log("no singleview");
-				var newrouter = new Backbone.Router({});
-				newrouter.navigate("", {trigger: true});
-			}
+			app.switchSingle(project);
 		});
+		if (typeof app.projviews !== "undefined") {
+			if (app.projviews.length != 1) {
+				app.switchSingle(project);
+			}	
+		}
 	},
 	
 	debug: function() {
-/* 		$(".nav").fadeOut("slow"); */
-		$(".debug").text('elders models:');
-		console.log(_(Cartofolio.elders.models).map(function (model) {
-				return model.get("title");
-		}));
-		_(Cartofolio.elders.models).map(function (model) {
-				$(".debug").append("</br>" + model.get("title"));
-		});
+		app.skelContainer();
 	},
 	
 	index: function() {
@@ -206,13 +188,32 @@ function(app, Cartofolio, Project) {
 		console.log(":: switching to " + newlayout.className);
 		
 		if (newlayout.className != "home") {
-			if ( $(".header").is(":visible") ) {
-				app.layouts.mondo.setView(".header", app.layouts.nav).render();
-			}
+		
 			
+			if ( $(".header").is(":visible") ) {
+				app.layouts.mondo.setView(".header", app.layouts.nav).render().done(function() {
+					$("a." + newlayout.className).css("color", "white");
+					if (newlayout.className == "single") {
+						$("a.skeleton").text("back to projects");
+					}
+					
+				});
+			}
+						
 			else {
 				app.layouts.mondo.setView(".header", app.layouts.nav).render().done(function () {
-					$(".header").fadeIn(600, "easeInQuad");
+					$("a." + newlayout.className).css("color", "white");
+					if (newlayout.className == "single") {
+						$("a.skeleton").text("back to projects");
+					}
+					
+					$(".header").fadeIn(600, "easeInQuad", function () {
+						$("a." + newlayout.className).css("color", "white");
+						if (newlayout.className == "single") {
+							$("a.skeleton").text("back to projects");
+						}
+						
+					});
 				});
 			}
 		}
@@ -226,7 +227,7 @@ function(app, Cartofolio, Project) {
 		if ($(".container").is(":visible")) {
 			$(".container").fadeOut("fast", function () {
 				app.layouts.mondo.setView(".container", newlayout).render().done(function () {
-					(newlayout.className == "skeleton") ? app.skelContainer() : app.moveContainer();
+					(newlayout.className == "skeleton" || newlayout.className == "single") ? app.skelContainer() : app.moveContainer();
 					$(".container").fadeIn(600, "easeInQuad");
 				});
 			});
@@ -234,9 +235,26 @@ function(app, Cartofolio, Project) {
 		
 		else {
 			app.layouts.mondo.setView(".container", newlayout).render().done(function () {
-				(newlayout.className == "skeleton") ? app.skelContainer() : app.moveContainer();
+				(newlayout.className == "skeleton" || newlayout.className == "single") ? app.skelContainer() : app.moveContainer();
 				$(".container").fadeIn(600, "easeInQuad");
 			});
+		}
+		
+	}
+	
+	app.switchSingle = function ( project ) {
+		var singleview;
+		_(app.projviews).map(function ( view ) {
+			if (view.model.get("slug") == project) {
+				singleview = view;
+			}
+		});
+		if (typeof singleview !== "undefined") {
+			switchTo( singleview );
+		}
+		else {
+			var newrouter = new Backbone.Router({});
+			newrouter.navigate("", {trigger: true});
 		}
 	}
 	
@@ -244,6 +262,7 @@ function(app, Cartofolio, Project) {
 		var ww = $(window).width();
 		var wh = $(window).height();
 		$(".container").css("width", "auto");
+		$(".container").css("height", "auto");
 		var tw = $(".container").width();
 		var th = $(".container").height();
 		
@@ -262,15 +281,24 @@ function(app, Cartofolio, Project) {
 	  	$(".container").css("top", ($(".header").outerHeight() + buffer) + "px");
 	  	
 	  	if ($(".container").find($(".single")).length) {
-		  	$(".sidebar").css("width", $(".container").width()/4 + "px");
+	  		var sbw;
+	  		if ($(".container").width()/4 < 300) $(".sidebar").css("width", "300px");
+	  		else if ($(".container").width()/4 >= 300) $(".sidebar").css("width", $(".container").width()/4 + "px");
+	  		
 			$(".sidebar").css("height", $(".container").height() + "px");
 			
+			var available = $(".sidebar").height();
+			$(".sidebar th").css("height", available/($(".sidebar td").length + 1) + "px");
+			$(".sidebar td").css("height", available/($(".sidebar td").length + 1) + "px");
+			$(".mainstage").css("left", $(".sidebar").outerWidth() + "px");
 			
-			var available = $(".sidebar").height() - $(".sidebar th").outerHeight();
-			console.log("available: " + available);
-			
-			console.log(available/$(".sidebar td").length);
-			$(".sidebar td").css("height", available/$(".sidebar td").length + "px");
+			var msw = $(".container").width()-$(".sidebar").outerWidth();
+			var newwidth;
+			if (msw > 900) newwidth = 900;
+			else if (msw <= 700 && msw > 400) newwidth = $(".container").width()-$(".sidebar").outerWidth();
+			else if (msw <= 400) newwidth = 400;
+			$(".mainstage").css("height", $(".container").height() + "px");
+			$(".mainstage").css("width", newwidth + "px");
 /*
 			$(".sidebar td").each(function ( index ) {
 				if (index%2 == 0) $(this).css("background-color", "red");
