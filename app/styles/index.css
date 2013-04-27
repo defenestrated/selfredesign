@@ -76,7 +76,7 @@ p {
 	height: 100%;
 }
 .container {
-/* 	border: 1px solid rgba(0,0,0,0.3); */
+	border: 1px solid rgba(0,0,0,0.3);
 
 	display: none;
 	position: absolute;
@@ -100,7 +100,7 @@ p {
 }
 
 .nav {
-	background: rgba(255,0,0,0.3);
+/* 	background: rgba(255,0,0,0.3); */
 	font: normal normal 12px/1.2em "FuturaBk", "Lucida Console", monospace;
 }
 
@@ -193,6 +193,7 @@ a.logo {
 }
 
 /* !-------------   projects   --------------- */
+
 
 .skelback {	
 	display: none;

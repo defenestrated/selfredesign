@@ -7,11 +7,15 @@ define([
 
 function(app, Cartofolio, Project) {
 
+	app.rtime = new Date(1, 1, 2000, 12,00,00);
+	app.timeout = false;
+	app.delta = 200;
+	
   // Defining the application router, you can attach sub routers here.
 	var mainrouter = Backbone.Router.extend({
 
 		initialize: function () {
-			
+			console.log(app.rtime);
 			app.layouts.mondo = new Backbone.Layout({
 		  		template: "mondo",
 		  		el: "body"
@@ -37,7 +41,12 @@ function(app, Cartofolio, Project) {
 					var th = $(".nav ul li").height();
 /* 					console.log(hh, th); */
 					$(".nav ul li").css("padding-top", (hh-th)/2 + "px !important");
-				}
+				},
+				
+				afterRender: function () {
+					app.navSizeCheck();
+				}				
+				
 			});
 			app.layouts.home = new pageView({
 				template: "home",
@@ -166,20 +175,14 @@ function(app, Cartofolio, Project) {
 		
 		initialize: function () {
 			
+/* 			!pageView resize */
 			$(window).resize(function() {
-			   if ( $(".container").find($(".skeleton")).length || $(".container").find($(".single")).length ) {
-	        	app.skelContainer();
-        	}
-        	else {
-        		app.moveContainer();
-        	}
+				app.rtime = new Date();
+			    if (app.timeout === false) {
+			        app.timeout = true;
+			        setTimeout(app.resizeend, app.delta);
+			    }
 			});
-			
-			this.collection.on("reset", function () {
-				//console.log("elders reset");
-			});
-			
-/* 			console.log("pageView init: " + this.className); */
 		}
 	});
 	
@@ -261,8 +264,17 @@ function(app, Cartofolio, Project) {
 	app.moveContainer = function() {
 		var ww = $(window).width();
 		var wh = $(window).height();
-		$(".container").css("width", "auto");
-		$(".container").css("height", "auto");
+		
+		if (ww/wh < 1 || $(".header").outerHeight() > 75) {
+			$(".container").css("width", "100%");
+			$(".container").css("text-align", "center");
+			$(".container").css("height", "auto");
+		}
+		else {
+			$(".container").css("width", "auto");
+			$(".container").css("height", "auto");
+		}
+		
 		var tw = $(".container").width();
 		var th = $(".container").height();
 		
@@ -275,35 +287,71 @@ function(app, Cartofolio, Project) {
 	
 	app.skelContainer = function () {
 		var buffer = 20;
-	  	$(".container").css("width", $(window).width()-buffer*2);
-	  	$(".container").css("height", ($(window).height()-$(".header").outerHeight())-buffer*2);
+		var ww = $(window).width();
+		var wh = $(window).height();
+
+	  	$(".container").css("width", ww-buffer*2);
+	  	$(".container").css("height", (wh-$(".header").outerHeight())-buffer*2);
 	  	$(".container").css("left", buffer);
 	  	$(".container").css("top", ($(".header").outerHeight() + buffer) + "px");
 	  	
 	  	if ($(".container").find($(".single")).length) {
-	  		var sbw;
-	  		if ($(".container").width()/4 < 300) $(".sidebar").css("width", "300px");
-	  		else if ($(".container").width()/4 >= 300) $(".sidebar").css("width", $(".container").width()/4 + "px");
 	  		
-			$(".sidebar").css("height", $(".container").height() + "px");
+	  		if (ww/wh < 1 || $(".header").outerHeight() > 75) {
+		  		
+	  			$(".sidebar").css("width", $(".container").width()/3 + "px");
+		  		$(".sidebar").css("height", "auto");
+				$(".sidebar").css("padding", "0px");
+				
+				$(".sidebar th").css("height", "auto");
+				$(".sidebar td").css("height", "auto");
+				$(".sidebar td").css("padding", "5px 0");
+				$(".sidebar th").css("padding", "0 0 5px 0");
+				$(".sidebar td").css("font-size", "10px");
+				$(".sidebar th").css("font-size", "20px");
 			
-			var available = $(".sidebar").height();
-			$(".sidebar th").css("height", available/($(".sidebar td").length + 1) + "px");
-			$(".sidebar td").css("height", available/($(".sidebar td").length + 1) + "px");
-			$(".mainstage").css("left", $(".sidebar").outerWidth() + "px");
-			
-			var msw = $(".container").width()-$(".sidebar").outerWidth();
-			var newwidth;
-			if (msw > 900) newwidth = 900;
-			else if (msw <= 700 && msw > 400) newwidth = $(".container").width()-$(".sidebar").outerWidth();
-			else if (msw <= 400) newwidth = 400;
-			$(".mainstage").css("height", $(".container").height() + "px");
-			$(".mainstage").css("width", newwidth + "px");
-/*
-			$(".sidebar td").each(function ( index ) {
-				if (index%2 == 0) $(this).css("background-color", "red");
-			})
-*/
+				
+				
+				
+				$(".mainstage").css("left", $(".container").width()/2 + "px");
+				
+				var msw = $(".container").width()-$(".sidebar").outerWidth();
+				var newwidth;
+				if (msw > 900) newwidth = 900;
+				else if (msw <= 700 && msw > 400) newwidth = $(".container").width()-$(".sidebar").outerWidth();
+				else if (msw <= 400) newwidth = 400;
+				$(".mainstage").css("height", $(".container").height() + "px");
+				$(".mainstage").css("width", newwidth + "px");
+	  		}
+	  		else {
+		  		var sbw;
+		  		if ($(".container").width()/4 < 300) $(".sidebar").css("width", "300px");
+		  		else if ($(".container").width()/4 >= 300) $(".sidebar").css("width", $(".container").width()/4 + "px");
+		  		
+		  		
+		  		// RESETS FOR RESIZING
+				$(".sidebar").css("height", $(".container").height() + "px");
+				$(".sidebar").css("padding", "");
+				$(".sidebar th").css("height", "");
+				$(".sidebar td").css("height", "");
+				$(".sidebar td").css("padding", "");
+				$(".sidebar th").css("padding", "");
+				$(".sidebar td").css("font-size", "");
+				$(".sidebar th").css("font-size", "20px");
+				
+				var available = $(".sidebar").height();
+				$(".sidebar th").css("height", available/($(".sidebar td").length + 1) + "px");
+				$(".sidebar td").css("height", available/($(".sidebar td").length + 1) + "px");
+				$(".mainstage").css("left", $(".sidebar").outerWidth() + "px");
+				
+				var msw = $(".container").width()-$(".sidebar").outerWidth();
+				var newwidth;
+				if (msw > 900) newwidth = 900;
+				else if (msw <= 700 && msw > 400) newwidth = $(".container").width()-$(".sidebar").outerWidth();
+				else if (msw <= 400) newwidth = 400;
+				$(".mainstage").css("height", $(".container").height() + "px");
+				$(".mainstage").css("width", newwidth + "px");
+	  		}
 	  	}
 	}
 	
@@ -329,6 +377,59 @@ function(app, Cartofolio, Project) {
 	app.fixScale = function ( model ) { 
 		if (model.get("scale") == 1) return model.get("scale") + " cubic foot";
 		else return model.get("scale") + " cubic feet";
+	}
+	
+	app.navSizeCheck = function () {
+		if ($(window).width()/$(window).height() < 1 || $(".header").outerHeight() > 75) {
+			$(".nav ul").fadeOut(300, "easeInOutQuad", function () {
+				$("a.logo").css("float", "none");
+				$(".nav ul li").css("padding", "0 0 1em 0");
+				$(".nav ul li a").css("font-size", "12px");
+				$(".nav ul li").css("margin-left", "19px");
+				$(".nav ul").fadeIn(300, "easeInOutQuad");
+				$("a.logo").animate({"font-size": "18px"}, 300, "easeInOutQuad", function () {
+					if ( $(".container").find($(".skeleton")).length || $(".container").find($(".single")).length ) {
+			       	 	app.skelContainer();
+		        	}
+				});
+			});
+			
+		}
+		else {
+			$(".nav ul").fadeOut(300, "easeInOutQuad", function () {
+				$("a.logo").css("float", "");
+				$(".nav ul li").css("padding", "");
+				$(".nav ul li a").css("font-size", "");
+				$(".nav ul li").css("margin-left", "");
+				$(".nav ul").fadeIn(300, "easeInOutQuad");
+				$("a.logo").animate({"font-size": "24px"}, 300, "easeInOutQuad", function () {
+					if ( $(".container").find($(".skeleton")).length || $(".container").find($(".single")).length ) {
+			       	 	app.skelContainer();
+		        	}
+				});
+				
+			});
+		}		
+	}
+	
+/* 	!end resize fn */
+	app.resizeend = function() {
+	    if (new Date() - app.rtime < app.delta) {
+	        setTimeout(app.resizeend, app.delta);
+	    } else {
+	        app.timeout = false;
+	        console.log("done resizing");
+	        if ( $(".container").find($(".skeleton")).length || $(".container").find($(".single")).length ) {
+	       	 	app.skelContainer();
+        	}
+        	else {
+        		app.moveContainer();
+        	}
+        	
+        	if ( $(".nav").length ) {
+        		app.navSizeCheck();
+        	}
+	    }               
 	}
 
   return mainrouter;
