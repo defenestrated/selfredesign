@@ -72,8 +72,6 @@ function(app, Cartofolio, Project) {
 			});
 			app.layouts.carto = new Cartofolio.Views.Mapview({});
 			
-			//app.layouts.mondo.insertView(app.layouts.debug).render();
-			
 			Cartofolio.elders.on("reset", function () {
 				app.projviews = _(Cartofolio.elders.models).map(function ( model ) {
 					return new Cartofolio.Views.Single({ model: model });
@@ -187,13 +185,9 @@ function(app, Cartofolio, Project) {
 		console.log(":: switching to " + newlayout.className);
 		
 		if (newlayout.className != "home") {
-			if ( $(".nav").length ) {
-        		app.navSizeCheck();
-        	}
-			
 			if ( $(".header").is(":visible") ) {
 				app.layouts.mondo.setView(".header", app.layouts.nav).render().done(function() {
-					
+					app.navSizeCheck();
 					$("a." + newlayout.className).css("color", "white");
 					if (newlayout.className == "single") {
 						$("a.skeleton").text("back to the list of projects");
@@ -204,6 +198,7 @@ function(app, Cartofolio, Project) {
 						
 			else {
 				app.layouts.mondo.setView(".header", app.layouts.nav).render().done(function () {
+					app.navSizeCheck();
 					$("a." + newlayout.className).css("color", "white");
 					if (newlayout.className == "single") {
 						$("a.skeleton").text("back to the list of projects");
@@ -211,10 +206,6 @@ function(app, Cartofolio, Project) {
 					
 					$(".header").fadeIn(600, "easeInQuad", function () {
 						$("a." + newlayout.className).css("color", "white");
-						if (newlayout.className == "single") {
-							$("a.skeleton").text("back to the list of projects");
-						}
-						
 					});
 				});
 			}
@@ -297,37 +288,57 @@ function(app, Cartofolio, Project) {
 		var buffer = 20;
 		var ww = $(window).width();
 		var wh = $(window).height();
-
-	  	$(".container").css("width", ww-buffer*2);
-	  	$(".container").css("height", (wh-$(".header").outerHeight())-buffer*2);
-	  	$(".container").css("left", buffer);
-	  	$(".container").css("top", ($(".header").outerHeight() + buffer) + "px");
+		
+	  	$(".container").css({
+			"width": 	ww-buffer*2 + "px",
+			"height": 	(wh-$(".header").outerHeight())-buffer*2 + "px",
+			"left":		buffer + "px",
+			"top":		($(".header").outerHeight() + buffer) + "px",
+			"padding-bottom": "20px"
+		});
 	  	
 	  	if ($(".container").find($(".single")).length) {
 	  		
 	  		if ($(window).width() < 1000) {
 	  			app.currsize = "little";
 		  		
-	  			$(".sidebar").css("width", $(".container").width()/3 + "px");
-		  		$(".sidebar").css("height", "auto");
-				$(".sidebar").css("padding", "0px");
+		  		$(".container").css({
+			  		"overflow": "auto"
+		  		});
+		  		
+	  			$(".sidebar").css({
+	  				"width": $(".container").width()/2 + "px",
+	  				"height": "auto",
+	  				"padding": "0px",
+	  				"float": "left"
+  				});
 				
-				$(".sidebar th").css("height", "auto");
-				$(".sidebar td").css("height", "auto");
-				$(".sidebar td").css("padding", "5px 0");
-				$(".sidebar th").css("padding", "0 0 5px 0");
-				$(".sidebar td").css("font-size", "10px");
-				$(".sidebar th").css("font-size", "20px");
-			
-				$(".mainstage").css("left", $(".container").width()/2 + "px");
+				$(".sidebar th").css({
+					"height": "auto",
+					"padding": "0 0 5px 0",
+					"font-size": "20px"
+				});
 				
-				var msw = $(".container").width()-$(".sidebar").outerWidth();
-				var newwidth;
-				if (msw > 900) newwidth = 900;
-				else if (msw <= 700 && msw > 400) newwidth = $(".container").width()-$(".sidebar").outerWidth();
-				else if (msw <= 400) newwidth = 400;
-				$(".mainstage").css("height", $(".container").height() + "px");
-				$(".mainstage").css("width", newwidth + "px");
+				$(".sidebar td").css({
+					"height": "auto",
+					"padding": "5px 0",
+					"font-size": "10px"
+				});
+				
+				if ($(".content_thumb").is(":visible")) $(".content_thumb").fadeOut(function () {
+					$(".little_thumb").css({
+						"left": $(".sidebar").width()+($(".container").width()-$(".sidebar").width()-$(".little_thumb").outerWidth())/2,
+						"top": ($(".sidebar").height()-$(".little_thumb").outerHeight())/2
+					});
+					$(".little_thumb").fadeIn();
+				});
+				
+				$(".mainstage").css({
+					"overflow": "hidden",
+					"left": 0,
+					"top": $(".sidebar").height() + "px",
+					"width": widthcalc("little") + "px"					
+				});
 				
 	  		}
 	  		
@@ -338,28 +349,59 @@ function(app, Cartofolio, Project) {
 		  		
 		  		
 		  		// RESETS FOR RESIZING
-				$(".sidebar").css("height", $(".container").height() + "px");
-				$(".sidebar").css("padding", "");
-				$(".sidebar th").css("height", "");
-				$(".sidebar td").css("height", "");
-				$(".sidebar td").css("padding", "");
-				$(".sidebar th").css("padding", "");
-				$(".sidebar td").css("font-size", "");
-				$(".sidebar th").css("font-size", "20px");
+		  		
+		  		$(".container").css({
+			  		"overflow": "hidden"
+		  		});
+		  		
+		  		$(".sidebar").css({
+	  				"height": $(".container").height() + "px",
+	  				"padding": "",
+	  				"clear": "both"
+  				});
 				
+				$(".sidebar th").css({
+					"padding": "",
+					"font-size": "20px"
+				});
+				
+				$(".sidebar td").css({
+					"padding": "",
+					"font-size": ""
+				});
+		  		
+		  		if (!$(".content_thumb").is(":visible")) $(".little_thumb").fadeOut(function () {
+				  		$(".content_thumb").fadeIn();
+			  		});
+		  		
 				var available = $(".sidebar").height();
 				$(".sidebar th").css("height", available/($(".sidebar td").length + 1) + "px");
 				$(".sidebar td").css("height", available/($(".sidebar td").length + 1) + "px");
-				$(".mainstage").css("left", $(".sidebar").outerWidth() + "px");
 				
-				var msw = $(".container").width()-$(".sidebar").outerWidth();
-				var newwidth;
-				if (msw > 900) newwidth = 900;
-				else if (msw <= 700 && msw > 400) newwidth = $(".container").width()-$(".sidebar").outerWidth();
-				else if (msw <= 400) newwidth = 400;
-				$(".mainstage").css("height", $(".container").height() + "px");
-				$(".mainstage").css("width", newwidth + "px");
+				$(".mainstage").css({
+					"overflow": "auto",
+					"left": $(".sidebar").outerWidth() + "px",
+					"top": "",
+					"height": $(".container").height() + "px",
+					"width": widthcalc("big") + "px",
+					"padding-right": $(".container").width()-$(".sidebar").outerWidth()-widthcalc("big") + "px"
+				});
 	  							
+	  		}
+	  		
+	  		function widthcalc( size ) {
+	  			if (size == "little") {
+		  			return $(".container").width();
+	  			}
+	  			
+	  			else {
+		  			var msw = $(".container").width()-$(".sidebar").outerWidth();
+					var newwidth;
+					if (msw > 900) newwidth = 900;
+					else if (msw <= 700 && msw > 400) newwidth = msw;
+					else if (msw <= 400) newwidth = 400;
+					return newwidth;		  			
+	  			}  			
 	  		}
 	  	}
 	}
@@ -387,7 +429,7 @@ function(app, Cartofolio, Project) {
 	}
 	
 	app.navSizeCheck = function () {
-		
+		console.log("navcheck", app.currsize, app.prevsize);
 		if ($(".container").find($(".single")).length) amt = 1000;
 		else if (!$(".container").find($(".single")).length) amt = 875;
 		
@@ -396,15 +438,12 @@ function(app, Cartofolio, Project) {
 			$(".nav ul").fadeOut(300, "easeInOutQuad", function () {
 				$("a.logo").css("float", "none");
 				$(".nav ul li").css("padding", "0 0 1em 0");
-				$(".nav ul li a").css("font-size", "12px");
 				$(".nav ul li").css("margin-left", "19px");
 				$(".nav ul li").css("margin-right", "50px");
+				
+				$(".nav ul li a").css("font-size", "12px");
 				$(".nav ul").fadeIn(300, "easeInOutQuad");
-				$("a.logo").animate({"font-size": "18px"}, 300, "easeInOutQuad", function () {
-					if ( $(".container").find($(".skeleton")).length || $(".container").find($(".single")).length ) {
-			       	 	app.skelContainer();
-		        	}
-				});
+				$("a.logo").animate({"font-size": "18px"}, 300, "easeInOutQuad");
 			});
 			app.prevsize = "little";
 		}
@@ -424,14 +463,13 @@ function(app, Cartofolio, Project) {
 				$(".nav ul li a").css("font-size", "");
 				$(".nav ul li").css("margin-left", "");
 				$(".nav ul").fadeIn(300, "easeInOutQuad");
-				$("a.logo").animate({"font-size": "24px"}, 300, "easeInOutQuad", function () {
-					if ( $(".container").find($(".skeleton")).length || $(".container").find($(".single")).length ) {
-			       	 	app.skelContainer();
-		        	}
-				});
+				$("a.logo").animate({"font-size": "24px"}, 300, "easeInOutQuad");
 				
 			});
 			app.prevsize = "big";
+		}
+		if ( $(".container").find($(".skeleton")).length || $(".container").find($(".single")).length ) {
+	   	 	app.skelContainer();
 		}		
 	}
 	

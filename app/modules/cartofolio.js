@@ -488,6 +488,7 @@ function(app, Project, Controls) {
 		lay.$el
 			.append('<div class="sidebar"></div>')
 			.append('<div class="mainstage"></div>')
+			.append('<img class="little_thumb" src="' + model.get("thumbnail") + '"></img>')
 		;
 		
 		$(".sidebar").append("<table class='sidetable' cellspacing='0' cellpadding='0'></table>");
