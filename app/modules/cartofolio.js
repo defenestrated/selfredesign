@@ -52,7 +52,6 @@ function(app, Project, Controls) {
 	  /* !skeleton init */
 	  initialize: function(){
 	  	_.bindAll(this);
-		console.log("- skeleton view initialized.");
 	  },
 	  
 	  afterRender: function() {
@@ -221,7 +220,6 @@ function(app, Project, Controls) {
 		
 		var cmp = this;
 		
-		console.log("- cartofolio layout initialized.");
 	},
 		
 		d3_dom: function() {

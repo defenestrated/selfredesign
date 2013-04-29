@@ -42,6 +42,7 @@ a {
 	color: black; 
 	text-decoration: none;
 	font: normal normal 13px/1.2em "FuturaBk", "Lucida Console", monospace;
+	word-spacing: -0.3em;
 	letter-spacing: 0.3em;
 	-webkit-transition:color .1s ease-in-out;  
    	-moz-transition:color .1s ease-in-out;  
@@ -81,6 +82,7 @@ p {
 	display: none;
 	position: absolute;
 	font: normal normal 12px/1.2em "FuturaBk", "Lucida Console", monospace;
+	word-spacing: -0.3em;
 	color: black;
 	letter-spacing: 0.15em;
 	left: 0;
@@ -88,9 +90,7 @@ p {
 	overflow: hidden;
 }
 
-.header { 
-	display: none;
-	
+.header {
 	white-space: nowrap;
 	position: absolute;
 	top: 0;
@@ -99,19 +99,19 @@ p {
 	background: rgba(0,0,0,0.7);
 }
 
-.nav {
-/* 	background: rgba(255,0,0,0.3); */
-	font: normal normal 12px/1.2em "FuturaBk", "Lucida Console", monospace;
-}
-
 a.logo {
-	font: normal normal 24px/2em "FuturaBk", "Lucida Console", monospace;
+	font: normal normal 24px "FuturaBk", "Lucida Console", monospace;
 	color: rgb(175,175,175);
 	text-transform: uppercase;
 	letter-spacing: 0.1em;
 	text-decoration: none;
-	padding-left: 1em;
+	margin: 0.3em 0 0.3em 20px;
 	float: left;
+}
+
+.nav.skinny a.logo {
+	width: 100%;
+	clear: both;
 }
 
 .nav ul {
@@ -125,9 +125,16 @@ a.logo {
 
 .nav ul li {
 	float: left;
-	padding: 1.35em 2em;
-	margin-left: 3em;
+	padding: 1em 2em;
+	margin-left: 0;
+	word-spacing: -0.3em;
 }
+
+.nav.skinny ul li {
+	padding: 0 1em 1em 0;
+	margin-left: 20px;
+}
+
 
 .nav a {
 	color: rgb(175,175,175);
@@ -162,6 +169,7 @@ a.logo {
 	color: black; 
 	text-decoration: none;
 	font: normal normal 16px/1.2em "Futura", "Lucida Console", monospace;
+	word-spacing: -0.3em;
 	letter-spacing: 0.12em;
 }
 .home a:hover { color: rgb(251,255,103) }
@@ -196,6 +204,7 @@ a.logo {
 
 .skeleton {
 	overflow: auto;
+	text-align: left;
 }
 
 .skelback {	
@@ -367,12 +376,6 @@ circle.orbcircle {
 }
 g.link:hover ellipse.link{
 	fill: red;
-}
-
-text.link {
-	font: 8pt "Menlo", "Consolas", "Lucida Console", "Courier", monospace;
-	text-anchor: middle;
-	baseline-shift: -30%;
 }
 
 

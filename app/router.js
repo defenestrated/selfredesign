@@ -10,13 +10,23 @@ function(app, Cartofolio, Project) {
 	app.rtime = new Date(1, 1, 2000, 12,00,00);
 	app.timeout = false;
 	app.delta = 200;
-	app.prevsize;
-	app.currsize = "big";
+	app.currpage = "";
+	app.shouldBeSkinny = false;
+	
+	// default page view
+	var pageView = Backbone.Layout.extend({
+		collection: Cartofolio.elders,
+		className: "defaultPageClass",
+		firstRender: true
+	});
 	
   // Defining the application router, you can attach sub routers here.
 	var mainrouter = Backbone.Router.extend({
 
 		initialize: function () {
+			
+			app.weightwatcher(false);
+			
 			app.layouts.mondo = new Backbone.Layout({
 		  		template: "mondo",
 		  		el: "body"
@@ -25,30 +35,54 @@ function(app, Cartofolio, Project) {
 	  		
 			console.log("router initializing...");
 			
-			mainrouter.getPosts(function (data) {			
+			mainrouter.getPosts(function (data) {	
 				_.each(data.posts, function(post) {
 					app.numprojects++;
 					Cartofolio.projects.add(post);
-					
 				});
 				Cartofolio.extractElders();
 			});
 			
+			
+			
+			
 			app.layouts.nav = new pageView({
 				template: "nav",
 				className: "nav",
+				
 				beforeRender: function () {
-					var hh = $(".header").height();
-					var th = $(".nav ul li").height();
-/* 					console.log(hh, th); */
-					$(".nav ul li").css("padding-top", (hh-th)/2 + "px !important");
+					app.on("weightchange", function () {
+						console.log("changed weight");
+						if (app.shouldBeSkinny) $(".nav").addClass("skinny");
+						else $(".nav").removeClass("skinny");
+					});
+					
+					if (this.firstRender) {
+						$(".header").css("visibility", "hidden");
+						var hh = $(".header").height();
+						var th = $(".nav ul li").height();
+						$(".nav ul li").css("padding-top", (hh-th)/2 + "px !important");						
+						$(".header").css({
+							"visibility": "visible",
+							"display": "none"
+						});
+						
+					}
 				},
 				
 				afterRender: function () {
-					app.navSizeCheck();
-				}				
+					$("a." + app.currpage).css("color", "white");
+					if (app.shouldBeSkinny) $(".nav").addClass("skinny");
+						else $(".nav").removeClass("skinny");
+					if (app.currpage == "single") $("a.skeleton").text("back to the list of projects");
+					if (this.firstRender) { 
+						$(".header").fadeIn(600, "easeInOutQuad");
+						this.firstRender = false;
+					}
+				}
 				
 			});
+			
 			app.layouts.home = new pageView({
 				template: "home",
 				className: "home"
@@ -61,7 +95,6 @@ function(app, Cartofolio, Project) {
 				template: "resumes",
 				className: "resumes"
 			});
-			
 			app.layouts.debug = new pageView({
 				template: "debug",
 				className: "debug"
@@ -78,7 +111,14 @@ function(app, Cartofolio, Project) {
 				});
 				app.trigger("viewsready");
 			});
-
+			
+			$(window).resize(function() {
+				app.rtime = new Date();
+			    if (app.timeout === false) {
+			        app.timeout = true;
+			        setTimeout(app.resizeend, app.delta);
+			    }
+			});
 		},
 		
 	/* !routes */
@@ -94,24 +134,24 @@ function(app, Cartofolio, Project) {
 	},
 
 	carto: function() {
-		console.log("carto route");
+		console.log(":: carto route");
 		app.layouts.mondo.setView(".container", app.layouts.carto).render();			
 	},
 	skeleton: function() {
-		console.log("skeleton route");
+		console.log(":: skeleton route");
 		switchTo( app.layouts.skel );
 		//app.layouts.skel.showprojects();
 	},
 	contact: function() {
-		console.log("contact route");
+		console.log(":: contact route");
 		switchTo( app.layouts.contact )
 	},
 	resumes: function() {
-		console.log("resumes route");
+		console.log(":: resumes route");
 		switchTo( app.layouts.resumes )
 	},
 	single: function (project) {
-		console.log("single project route for " + project);
+		console.log(":: single project route for " + project);
 		if (project == "skeleton") this.navigate("skeleton", {trigger: true});
 		
 		app.on("viewsready", function () {
@@ -124,7 +164,9 @@ function(app, Cartofolio, Project) {
 		}
 	},
 	debug: function() {
-		app.skelContainer();
+		console.log(":: debug route");
+		
+		app.weightwatcher();
 	},
 	index: function() {
 		console.log("index route called.");
@@ -161,59 +203,18 @@ function(app, Cartofolio, Project) {
 
 	};
 	
-	/* !page view */
-	var pageView = Backbone.Layout.extend({
-	
-		collection: Cartofolio.elders,
-		className: "defaultPageClass",
-		
-		initialize: function () {
-			
-/* 			!pageView resize */
-			$(window).resize(function() {
-				app.rtime = new Date();
-			    if (app.timeout === false) {
-			        app.timeout = true;
-			        setTimeout(app.resizeend, app.delta);
-			    }
-			});
-		}
-	});
-	
 	function switchTo( newlayout ) {
 		
-		console.log(":: switching to " + newlayout.className);
+		app.currpage = newlayout.className;
 		
 		if (newlayout.className != "home") {
-			if ( $(".header").is(":visible") ) {
-				app.layouts.mondo.setView(".header", app.layouts.nav).render().done(function() {
-					app.navSizeCheck();
-					$("a." + newlayout.className).css("color", "white");
-					if (newlayout.className == "single") {
-						$("a.skeleton").text("back to the list of projects");
-					}
-					
-				});
-			}
-						
-			else {
-				app.layouts.mondo.setView(".header", app.layouts.nav).render().done(function () {
-					app.navSizeCheck();
-					$("a." + newlayout.className).css("color", "white");
-					if (newlayout.className == "single") {
-						$("a.skeleton").text("back to the list of projects");
-					}
-					
-					$(".header").fadeIn(600, "easeInQuad", function () {
-						$("a." + newlayout.className).css("color", "white");
-					});
-				});
-			}
+			app.layouts.mondo.setView(".header", app.layouts.nav).render();
 		}
 		
 		else if (newlayout.className == "home") {
+			app.layouts.nav.firstRender = true;
 			if ( $(".header").is(":visible") ) {
-				$(".header").fadeOut(1000, "easeInQuad");
+				$(".header").fadeOut(1000, "easeInOutQuad");
 			}
 		}
 		
@@ -221,7 +222,7 @@ function(app, Cartofolio, Project) {
 			$(".container").fadeOut("fast", function () {
 				app.layouts.mondo.setView(".container", newlayout).render().done(function () {
 					(newlayout.className == "skeleton" || newlayout.className == "single") ? app.skelContainer() : app.moveContainer();
-					$(".container").fadeIn(600, "easeInQuad");
+					$(".container").fadeIn(600, "easeInOutQuad");
 				});
 				
 			});
@@ -230,7 +231,7 @@ function(app, Cartofolio, Project) {
 		else {
 			app.layouts.mondo.setView(".container", newlayout).render().done(function () {
 				(newlayout.className == "skeleton" || newlayout.className == "single") ? app.skelContainer() : app.moveContainer();
-				$(".container").fadeIn(600, "easeInQuad");
+				$(".container").fadeIn(600, "easeInOutQuad");
 			});
 		}
 		
@@ -406,6 +407,16 @@ function(app, Cartofolio, Project) {
 	  	}
 	}
 	
+	app.weightwatcher = function (onresize) {
+		var ww = $(window).width();
+		
+		if (ww < 830) app.shouldBeSkinny = true;
+		else app.shouldBeSkinny = false;
+		
+		if (onresize) app.trigger("weightchange");
+		console.log("current width: " + ww + ". should be skinny? " + app.shouldBeSkinny);
+	}
+	
 	app.fixDate = function ( model ) {
 		var m_names = new Array("January", "February", "March", 
 		"April", "May", "June", "July", "August", "September", 
@@ -427,52 +438,7 @@ function(app, Cartofolio, Project) {
 		if (model.get("scale") == 1) return model.get("scale") + " cubic foot";
 		else return model.get("scale") + " cubic feet";
 	}
-	
-	app.navSizeCheck = function () {
-		console.log("navcheck", app.currsize, app.prevsize);
-		if ($(".container").find($(".single")).length) amt = 1000;
-		else if (!$(".container").find($(".single")).length) amt = 875;
 		
-		if ($(window).width() < amt && app.prevsize != "little") {
-			app.currsize = "little";
-			$(".nav ul").fadeOut(300, "easeInOutQuad", function () {
-				$("a.logo").css("float", "none");
-				$(".nav ul li").css("padding", "0 0 1em 0");
-				$(".nav ul li").css("margin-left", "19px");
-				$(".nav ul li").css("margin-right", "50px");
-				
-				$(".nav ul li a").css("font-size", "12px");
-				$(".nav ul").fadeIn(300, "easeInOutQuad");
-				$("a.logo").animate({"font-size": "18px"}, 300, "easeInOutQuad");
-			});
-			app.prevsize = "little";
-		}
-		else if ($(window).width() < amt && app.prevsize == "little") {
-			$("a.logo").css("float", "none");
-			$(".nav ul li").css("padding", "0 0 1em 0");
-			$(".nav ul li a").css("font-size", "12px");
-			$(".nav ul li").css("margin-left", "19px");
-			$(".nav ul li").css("margin-right", "50px");
-			$("a.logo").css("font-size", "18px");
-		}
-		else if ($(window).width() > amt && app.prevsize != "big"){
-			app.currsize = "big";
-			$(".nav ul").fadeOut(300, "easeInOutQuad", function () {
-				$("a.logo").css("float", "");
-				$(".nav ul li").css("padding", "");
-				$(".nav ul li a").css("font-size", "");
-				$(".nav ul li").css("margin-left", "");
-				$(".nav ul").fadeIn(300, "easeInOutQuad");
-				$("a.logo").animate({"font-size": "24px"}, 300, "easeInOutQuad");
-				
-			});
-			app.prevsize = "big";
-		}
-		if ( $(".container").find($(".skeleton")).length || $(".container").find($(".single")).length ) {
-	   	 	app.skelContainer();
-		}		
-	}
-	
 /* 	!end resize fn */
 	app.resizeend = function() {
 	    if (new Date() - app.rtime < app.delta) {
@@ -485,10 +451,7 @@ function(app, Cartofolio, Project) {
         	else {
         		app.moveContainer();
         	}
-        	
-        	if ( $(".nav").length ) {
-        		app.navSizeCheck();
-        	}
+        	app.weightwatcher(true);
 	    }               
 	}
 
