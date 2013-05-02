@@ -10,7 +10,7 @@ function(app, Cartofolio, Project) {
 	app.rtime = new Date(1, 1, 2000, 12,00,00);
 	app.timeout = false;
 	app.delta = 200;
-	app.currpage = "";
+	app.currpage;
 	app.shouldBeSkinny = false;
 	
 	// default page view
@@ -71,10 +71,10 @@ function(app, Cartofolio, Project) {
 				},
 				
 				afterRender: function () {
-					$("a." + app.currpage).css("color", "white");
+					$("a." + app.currpage.className).css("color", "white");
 					if (app.shouldBeSkinny) $(".nav").addClass("skinny");
 						else $(".nav").removeClass("skinny");
-					if (app.currpage == "single") $("a.skeleton").text("back to the list of projects");
+					if (app.currpage.className == "single") $("a.skeleton").text("back to the list of projects");
 					if (this.firstRender) { 
 						$(".header").fadeIn(600, "easeInOutQuad");
 						this.firstRender = false;
@@ -205,36 +205,86 @@ function(app, Cartofolio, Project) {
 	
 	function switchTo( newlayout ) {
 		
-		app.currpage = newlayout.className;
+		console.log("::: switching to " + newlayout.className);
 		
+		app.currpage = newlayout;
+		
+		console.log("switching with skinny? " + app.shouldBeSkinny);
+		
+			/****************************
+			
+			fade out container
+			render new layout
+			
+			in new layout's afterrender:
+				make container invisible
+				fix container scaling
+				fade container back in
+			
+			*****************************/
+			
+		if (newlayout.className != "skeleton") app.layouts.skel.firstRender = true;
+		
+		/* for all pages except home */
 		if (newlayout.className != "home") {
-			app.layouts.mondo.setView(".header", app.layouts.nav).render();
-		}
+			app.layouts.mondo.setView(".header", app.layouts.nav).render().done(function () {
+				var buffer = 20;
+				var ww = $(window).width();
+				var wh = $(window).height();
+				
+				app.layouts.mondo.setView(".container", newlayout).render().done(function () {
+	
+					/* for skinny layouts */
+					if (app.shouldBeSkinny) {
+						
+						/* for all pages that need full real estate */
+						if (newlayout.className == "single" || newlayout.className == "skeleton") {
+							$(".container").css({
+								"width": 	ww-buffer*2 + "px",
+								"height": 	(wh-$(".header").outerHeight())-buffer*2 + "px",
+								"left":		buffer + "px",
+								"top":		($(".header").outerHeight() + buffer) + "px"
+							});
+						}
+						/* for all that don't */
+						else {
+							
+							$(".container").css({
+								"width": "100%",
+								"text-align": "center",
+								"height": "auto"
+							});
+						}//end centered content if/else
+					}//end skinny layouts
+					
+					/* for fat layouts */
+					else {						
+						if (newlayout.className == "single" || newlayout.className == "skeleton") {
+							$(".container").css({
+								"width": 	ww-buffer*2 + "px",
+								"height": 	(wh-$(".header").outerHeight())-buffer*2 + "px",
+								"left":		buffer + "px",
+								"top":		($(".header").outerHeight() + buffer) + "px"
+							});
+						}
+						else $(".container").css({
+							"width": "auto",
+							"height": "auto"
+						});
+					}//end fat layouts
+					
+				});//end render done callback
+			});//end nav render done
+		}//end if not home
 		
+		/* for the home page */
 		else if (newlayout.className == "home") {
 			app.layouts.nav.firstRender = true;
 			if ( $(".header").is(":visible") ) {
 				$(".header").fadeOut(1000, "easeInOutQuad");
 			}
 		}
-		
-		if ($(".container").is(":visible")) {
-			$(".container").fadeOut("fast", function () {
-				app.layouts.mondo.setView(".container", newlayout).render().done(function () {
-					(newlayout.className == "skeleton" || newlayout.className == "single") ? app.skelContainer() : app.moveContainer();
-					$(".container").fadeIn(600, "easeInOutQuad");
-				});
-				
-			});
-		}
-		
-		else {
-			app.layouts.mondo.setView(".container", newlayout).render().done(function () {
-				(newlayout.className == "skeleton" || newlayout.className == "single") ? app.skelContainer() : app.moveContainer();
-				$(".container").fadeIn(600, "easeInOutQuad");
-			});
-		}
-		
+		newlayout.sizefix();
 	}
 	
 	app.switchSingle = function ( project ) {
@@ -251,160 +301,6 @@ function(app, Cartofolio, Project) {
 			var newrouter = new Backbone.Router({});
 			newrouter.navigate("", {trigger: true});
 		}
-	}
-	
-	app.moveContainer = function() {
-		var ww = $(window).width();
-		var wh = $(window).height();
-		
-		if ($(window).width() < 875) {
-			app.currsize = "little";
-			
-			$(".container").css("width", "100%");
-			$(".container").css("text-align", "center");
-			$(".container").css("height", "auto");
-			
-			
-		}
-		else {
-			app.currsize = "big";
-			
-			$(".container").css("width", "auto");
-			$(".container").css("height", "auto");
-			
-			
-		}
-		
-		var tw = $(".container").width();
-		var th = $(".container").height();
-		
-/* 		console.log(ww, wh, tw, th); */
-		
-		
-		$(".container").css("left", (ww-tw)/2 + "px");
-		$(".container").css("top", (wh-th)/2 + "px");
-	}
-	
-	app.skelContainer = function () {
-		var buffer = 20;
-		var ww = $(window).width();
-		var wh = $(window).height();
-		
-	  	$(".container").css({
-			"width": 	ww-buffer*2 + "px",
-			"height": 	(wh-$(".header").outerHeight())-buffer*2 + "px",
-			"left":		buffer + "px",
-			"top":		($(".header").outerHeight() + buffer) + "px",
-			"padding-bottom": "20px"
-		});
-	  	
-	  	if ($(".container").find($(".single")).length) {
-	  		
-	  		if ($(window).width() < 1000) {
-	  			app.currsize = "little";
-		  		
-		  		$(".container").css({
-			  		"overflow": "auto"
-		  		});
-		  		
-	  			$(".sidebar").css({
-	  				"width": $(".container").width()/2 + "px",
-	  				"height": "auto",
-	  				"padding": "0px",
-	  				"float": "left"
-  				});
-				
-				$(".sidebar th").css({
-					"height": "auto",
-					"padding": "0 0 5px 0",
-					"font-size": "20px"
-				});
-				
-				$(".sidebar td").css({
-					"height": "auto",
-					"padding": "5px 0",
-					"font-size": "10px"
-				});
-				
-				if ($(".content_thumb").is(":visible")) $(".content_thumb").fadeOut(function () {
-					$(".little_thumb").css({
-						"left": $(".sidebar").width()+($(".container").width()-$(".sidebar").width()-$(".little_thumb").outerWidth())/2,
-						"top": ($(".sidebar").height()-$(".little_thumb").outerHeight())/2
-					});
-					$(".little_thumb").fadeIn();
-				});
-				
-				$(".mainstage").css({
-					"overflow": "hidden",
-					"left": 0,
-					"top": $(".sidebar").height() + "px",
-					"width": widthcalc("little") + "px"					
-				});
-				
-	  		}
-	  		
-	  		else {
-	  			app.currsize = "big";	  					  				
-				if ($(".container").width()/4 < 300) $(".sidebar").css("width", "300px");
-		  		else if ($(".container").width()/4 >= 300) $(".sidebar").css("width", $(".container").width()/4 + "px");
-		  		
-		  		
-		  		// RESETS FOR RESIZING
-		  		
-		  		$(".container").css({
-			  		"overflow": "hidden"
-		  		});
-		  		
-		  		$(".sidebar").css({
-	  				"height": $(".container").height() + "px",
-	  				"padding": "",
-	  				"clear": "both"
-  				});
-				
-				$(".sidebar th").css({
-					"padding": "",
-					"font-size": "20px"
-				});
-				
-				$(".sidebar td").css({
-					"padding": "",
-					"font-size": ""
-				});
-		  		
-		  		if (!$(".content_thumb").is(":visible")) $(".little_thumb").fadeOut(function () {
-				  		$(".content_thumb").fadeIn();
-			  		});
-		  		
-				var available = $(".sidebar").height();
-				$(".sidebar th").css("height", available/($(".sidebar td").length + 1) + "px");
-				$(".sidebar td").css("height", available/($(".sidebar td").length + 1) + "px");
-				
-				$(".mainstage").css({
-					"overflow": "auto",
-					"left": $(".sidebar").outerWidth() + "px",
-					"top": "",
-					"height": $(".container").height() + "px",
-					"width": widthcalc("big") + "px",
-					"padding-right": $(".container").width()-$(".sidebar").outerWidth()-widthcalc("big") + "px"
-				});
-	  							
-	  		}
-	  		
-	  		function widthcalc( size ) {
-	  			if (size == "little") {
-		  			return $(".container").width();
-	  			}
-	  			
-	  			else {
-		  			var msw = $(".container").width()-$(".sidebar").outerWidth();
-					var newwidth;
-					if (msw > 900) newwidth = 900;
-					else if (msw <= 700 && msw > 400) newwidth = msw;
-					else if (msw <= 400) newwidth = 400;
-					return newwidth;		  			
-	  			}  			
-	  		}
-	  	}
 	}
 	
 	app.weightwatcher = function (onresize) {
@@ -445,13 +341,8 @@ function(app, Cartofolio, Project) {
 	        setTimeout(app.resizeend, app.delta);
 	    } else {
 	        app.timeout = false;
-	        if ( $(".container").find($(".skeleton")).length || $(".container").find($(".single")).length ) {
-	       	 	app.skelContainer();
-        	}
-        	else {
-        		app.moveContainer();
-        	}
         	app.weightwatcher(true);
+        	switchTo( app.currpage );
 	    }               
 	}
 
