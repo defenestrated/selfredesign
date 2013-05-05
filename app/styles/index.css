@@ -79,7 +79,8 @@ p {
 }
 .container {
 	border: 1px solid rgba(0,0,0,0.3);
-
+	text-align: left;
+	width: auto;
 	position: absolute;
 	font: normal normal 12px/1.2em "FuturaBk", "Lucida Console", monospace;
 	word-spacing: -0.3em;
@@ -88,6 +89,14 @@ p {
 	left: 0;
 	top: 0;
 	overflow: auto;
+}
+
+.container.skinny {
+	border: 1px solid rgba(255,0,0,1);
+	text-align: center;
+	width: 100%;
+	left: 0;
+	top: 0;
 }
 
 .header {
@@ -202,11 +211,6 @@ a.logo {
 
 /* !-------------   projects   --------------- */
 
-.skeleton {
-	overflow: auto;
-	text-align: left;
-}
-
 .skelback {	
 	display: none;
 	cursor: pointer;
@@ -219,6 +223,7 @@ a.logo {
 }
 
 .skelproj {
+	text-align: left;
 	display: none;
 	float: left;
 	width: 100%;

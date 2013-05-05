@@ -17,7 +17,94 @@ function(app, Cartofolio, Project) {
 	var pageView = Backbone.Layout.extend({
 		collection: Cartofolio.elders,
 		className: "defaultPageClass",
-		firstRender: true
+		sizefix: function () {},
+		firstRender: true,
+		
+		beforeRender: function () {
+			app.on("weightchange", function () {
+			});
+		},
+		
+		afterRender: function () {
+			console.log(this.className + " rendering for the first time? " + this.firstRender);
+			
+			$(".container").css({
+				"width": "",
+				"height": "",
+				"left": "",
+				"top": "",
+				"visibility": ""
+			});
+			
+			if (this.firstRender) {
+				
+				
+					
+				this.firstRender = false;
+				$(".container").css({"visibility": "hidden"});
+				
+				if (app.shouldBeSkinny) $(".container").addClass("skinny");
+				else $(".container").removeClass("skinny");
+				
+				var ch = $(".container").outerHeight();
+				var cw = $(".container").outerWidth();
+				var wh = $(window).height();
+				var ww = $(window).width();	
+			
+				$(".container").css({
+					"top": (wh-ch)/2 + "px"
+				});
+
+				if (app.shouldBeSkinny) $(".container").css({
+					"left": 0
+				});
+
+				else $(".container").css({
+					"left": (ww-cw)/2 + "px"
+				});
+			
+				
+				$(".container").css({
+					"visibility": "visible",
+					"display": "none"
+				});
+
+				$(".container").fadeIn(600, "easeInOutQuad");
+			}
+			
+			else { // resize
+				$(".container").fadeOut(300, "easeInOutQuad", function () {
+					$(".container").css({"visibility": "hidden"});
+					
+					if (app.shouldBeSkinny) $(".container").addClass("skinny");
+					else $(".container").removeClass("skinny");
+					
+					var ch = $(".container").outerHeight();
+					var cw = $(".container").outerWidth();
+					var wh = $(window).height();
+					var ww = $(window).width();	
+				
+					$(".container").css({
+						"top": (wh-ch)/2 + "px"
+					});
+
+					if (app.shouldBeSkinny) $(".container").css({
+						"left": 0
+					});
+
+					else $(".container").css({
+						"left": (ww-cw)/2 + "px"
+					});
+				
+					
+					$(".container").css({
+						"visibility": "visible",
+						"display": "none"
+					});
+					$(".container").fadeIn(300, "easeInOutQuad");
+				});
+			}
+		}
 	});
 	
   // Defining the application router, you can attach sub routers here.
@@ -52,7 +139,6 @@ function(app, Cartofolio, Project) {
 				
 				beforeRender: function () {
 					app.on("weightchange", function () {
-						console.log("changed weight");
 						if (app.shouldBeSkinny) $(".nav").addClass("skinny");
 						else $(".nav").removeClass("skinny");
 					});
@@ -73,7 +159,7 @@ function(app, Cartofolio, Project) {
 				afterRender: function () {
 					$("a." + app.currpage.className).css("color", "white");
 					if (app.shouldBeSkinny) $(".nav").addClass("skinny");
-						else $(".nav").removeClass("skinny");
+					else $(".nav").removeClass("skinny");
 					if (app.currpage.className == "single") $("a.skeleton").text("back to the list of projects");
 					if (this.firstRender) { 
 						$(".header").fadeIn(600, "easeInOutQuad");
@@ -166,7 +252,7 @@ function(app, Cartofolio, Project) {
 	debug: function() {
 		console.log(":: debug route");
 		
-		app.weightwatcher();
+		console.log($(".container").children());
 	},
 	index: function() {
 		console.log("index route called.");
@@ -205,86 +291,80 @@ function(app, Cartofolio, Project) {
 	
 	function switchTo( newlayout ) {
 		
-		console.log("::: switching to " + newlayout.className);
+		console.log("== switching to " + newlayout.className + " ==");
 		
 		app.currpage = newlayout;
 		
-		console.log("switching with skinny? " + app.shouldBeSkinny);
+		// when you navigate away from a page, reset that page's "firstRender" property
+		_(app.layouts).each(function (layout) {
+			if (typeof layout.className !== "undefined") {
+				if (newlayout.className != layout.className && layout.className != "nav") {
+					layout.firstRender = true;
+				}
+			};
+		});
 		
-			/****************************
-			
-			fade out container
-			render new layout
-			
-			in new layout's afterrender:
-				make container invisible
-				fix container scaling
-				fade container back in
-			
-			*****************************/
-			
-		if (newlayout.className != "skeleton") app.layouts.skel.firstRender = true;
-		
-		/* for all pages except home */
-		if (newlayout.className != "home") {
-			app.layouts.mondo.setView(".header", app.layouts.nav).render().done(function () {
-				var buffer = 20;
-				var ww = $(window).width();
-				var wh = $(window).height();
-				
-				app.layouts.mondo.setView(".container", newlayout).render().done(function () {
-	
-					/* for skinny layouts */
-					if (app.shouldBeSkinny) {
-						
-						/* for all pages that need full real estate */
-						if (newlayout.className == "single" || newlayout.className == "skeleton") {
-							$(".container").css({
-								"width": 	ww-buffer*2 + "px",
-								"height": 	(wh-$(".header").outerHeight())-buffer*2 + "px",
-								"left":		buffer + "px",
-								"top":		($(".header").outerHeight() + buffer) + "px"
-							});
-						}
-						/* for all that don't */
-						else {
-							
-							$(".container").css({
-								"width": "100%",
-								"text-align": "center",
-								"height": "auto"
-							});
-						}//end centered content if/else
-					}//end skinny layouts
-					
-					/* for fat layouts */
-					else {						
-						if (newlayout.className == "single" || newlayout.className == "skeleton") {
-							$(".container").css({
-								"width": 	ww-buffer*2 + "px",
-								"height": 	(wh-$(".header").outerHeight())-buffer*2 + "px",
-								"left":		buffer + "px",
-								"top":		($(".header").outerHeight() + buffer) + "px"
-							});
-						}
-						else $(".container").css({
-							"width": "auto",
-							"height": "auto"
-						});
-					}//end fat layouts
-					
-				});//end render done callback
-			});//end nav render done
-		}//end if not home
-		
-		/* for the home page */
-		else if (newlayout.className == "home") {
-			app.layouts.nav.firstRender = true;
-			if ( $(".header").is(":visible") ) {
-				$(".header").fadeOut(1000, "easeInOutQuad");
-			}
+		if ($(".container").children().length) {
+			console.log("do the fade");
+			$(".container").fadeOut(300, "easeInOutQuad", function () {
+				actualswitch();
+			});
 		}
-		newlayout.sizefix();
+		else {
+			console.log("don't do the fade");
+			actualswitch();
+		}
+		
+		function actualswitch() {
+			/* for all pages except home */
+			if (newlayout.className != "home") {
+				app.layouts.mondo.setView(".header", app.layouts.nav).render().done(function () {
+					var buffer = 20;
+					var ww = $(window).width();
+					var wh = $(window).height();
+					
+					app.layouts.mondo.setView(".container", newlayout).render().done(function () {
+		
+						/* for skinny layouts */
+						if (app.shouldBeSkinny) {
+							
+							/* for all pages that need full real estate */
+							if (newlayout.className == "single" || newlayout.className == "skeleton") {
+								$(".container").css({
+									"width": 	ww-buffer*2 + "px",
+									"height": 	(wh-$(".header").outerHeight())-buffer*2 + "px",
+									"left":		buffer + "px",
+									"top":		($(".header").outerHeight() + buffer) + "px"
+								});
+							}
+						}//end skinny layouts
+						
+						/* for fat layouts */
+						else {						
+							if (newlayout.className == "single" || newlayout.className == "skeleton") {
+								$(".container").css({
+									"width": 	ww-buffer*2 + "px",
+									"height": 	(wh-$(".header").outerHeight())-buffer*2 + "px",
+									"left":		buffer + "px",
+									"top":		($(".header").outerHeight() + buffer) + "px"
+								});
+							}
+						}//end fat layouts
+						
+					});//end render done callback
+				});//end nav render done
+			}//end if not home
+			
+			/* for the home page */
+			else if (newlayout.className == "home") {
+				app.layouts.nav.firstRender = true;
+				if ( $(".header").is(":visible") ) {
+					$(".header").fadeOut(1000, "easeInOutQuad");
+				}
+			}
+			
+			newlayout.sizefix();
+		}
 	}
 	
 	app.switchSingle = function ( project ) {
