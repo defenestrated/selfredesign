@@ -78,7 +78,7 @@ p {
 	overflow: hidden;
 }
 .container {
-	border: 1px solid rgba(0,0,0,0.3);
+/* 	border: 1px solid rgba(0,0,0,0.3); */
 	text-align: left;
 	width: auto;
 	position: absolute;
@@ -92,7 +92,7 @@ p {
 }
 
 .container.skinny {
-	border: 1px solid rgba(255,0,0,1);
+/* 	border: 1px solid rgba(255,0,0,1); */
 	text-align: center;
 	width: 100%;
 	left: 0;
@@ -268,7 +268,14 @@ a.logo {
 .single .sidebar {
 /* 	background: rgba(255,255,255,0.3); */
 	padding: 0 50px;
+	float: left;
 }
+
+.single .sidebar.skinny {
+	padding: 0 50px 0 0;
+	float: left;
+}
+
 
 table {
 	border-collapse: collapse !important;
@@ -285,6 +292,11 @@ table {
 	margin: 0;
 }
 
+.sidetable th.skinny {
+	font-size: 20px;
+	line-height: 1.1em;
+}
+
 .sidetable td {
 	text-align: left;
 	vertical-align: middle;
@@ -294,6 +306,11 @@ table {
 	letter-spacing: 0.1em;
 	text-transform: lowercase;
 	margin: 0;
+}
+
+.sidetable td.skinny {
+	font-size: 11px;
+	line-height: 2em;
 }
 
 .mainstage {

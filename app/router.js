@@ -171,7 +171,32 @@ function(app, Cartofolio, Project) {
 			
 			app.layouts.home = new pageView({
 				template: "home",
-				className: "home"
+				className: "home",
+				afterRender: function () {					
+					$(".container").css({
+						"visibility": "hidden",
+						"width": "auto",
+						"height": "auto"
+						
+					});
+					var ch = $(".container").height();
+					var cw = $(".container").width();
+					var wh = $(window).height();
+					var ww = $(window).width();
+					console.log(this.firstRender, cw, ch, ww, wh);
+					$(".container").css({
+						"top": (wh-ch)/2 + "px",
+						"left": (ww-cw)/2 + "px"
+					});
+				
+					
+					$(".container").css({
+						"visibility": "visible",
+						"display": "none"
+					});
+	
+					$(".container").fadeIn(600, "easeInOutQuad");
+				}
 			});
 			app.layouts.contact = new pageView({
 				template: "contact",
@@ -361,6 +386,7 @@ function(app, Cartofolio, Project) {
 				if ( $(".header").is(":visible") ) {
 					$(".header").fadeOut(1000, "easeInOutQuad");
 				}
+				app.layouts.mondo.setView(".container", newlayout).render();
 			}
 			
 			newlayout.sizefix();

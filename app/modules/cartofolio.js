@@ -498,117 +498,107 @@ function(app, Project, Controls) {
 	},
 
 	afterRender: function () {
+		$(".container").hide();
+		
 		var lay = this;
 		var model = this.model;
+		
+		var pieces = [
+			app.fixDate(model),
+			"took " + model.get("hours") + " hours of work",
+			"made with " + app.fixList(model, "materials"),
+			"used " + app.fixList(model, "techniques"),
+			"occupies " + model.get("dimensions") + " dimensions",
+			"takes up " + app.fixScale(model),
+			"made " + app.fixList(model, "reasons")
+		];
+		
+		var wrapped = _(pieces).map(function (thing) {
+			return "<tr><td>" + thing + "</td></tr>";
+		});
+		
+		wrapped.unshift("<tr><th>" + model.get("title") + "</th></tr>");
 
-		lay.$el
-			.append('<div class="sidebar"></div>')
-			.append('<div class="mainstage"></div>')
-			.append('<img class="little_thumb" src="' + model.get("thumbnail") + '"></img>')
-		;
+		lay.$el.append([
+			'<div class="sidebar"></div>',
+			'<div class="mainstage"></div>',
+			'<img class="little_thumb" src="' + model.get("thumbnail") + '"></img>'
+		]);
 
 		$(".sidebar").append("<table class='sidetable' cellspacing='0' cellpadding='0'></table>");
 
-		$("table.sidetable")
-			.append('<tr><th>' + model.get("title") + '<th></tr>')
-			.append('<tr><td>' + app.fixDate(model) + '</td></tr>')
-			.append('<tr><td>took ' + model.get("hours") + ' hours of work</td></tr>')
-			.append('<tr><td>made with ' + app.fixList(model, "materials") + '</td></tr>')
-			.append('<tr><td>used ' + app.fixList(model, "techniques") + '</td></tr>')
-			.append('<tr><td>occupies ' + model.get("dimensions") + ' dimensions</td></tr>')
-			.append('<tr><td>takes up ' + app.fixScale(model) + '</td></tr>')
-			.append('<tr><td>made ' + app.fixList(model, "reasons") + '</td></tr>')
-		;
+		$("table.sidetable").append(wrapped);
 
-		$(".mainstage")
-			.append('<img class="content_thumb" src="' + model.get("thumbnail") + '"></img>')
-			.append('<div class="maincontent">' + model.get("content") + '</div>')
-		;
+		$(".mainstage").append([
+			'<img class="content_thumb" src="' + model.get("thumbnail") + '"></img>',
+			'<div class="maincontent">' + model.get("content") + '</div>'
+		]);
 
 		this.sizefix();
 	},
 
 	sizefix: function () {
-		if ( app.shouldBeSkinny ) {
-			$(".container").css({
-					"overflow": "auto"
-	  		});
-
-  			$(".sidebar").css({
-  				"width": $(".container").width()/2 + "px",
-  				"height": "auto",
-  				"padding": "0px",
-  				"float": "left"
-				});
-
-			$(".sidebar th").css({
-				"height": "auto",
-				"padding": "0 0 5px 0",
-				"font-size": "20px"
-			});
-
-			$(".sidebar td").css({
-				"height": "auto",
-				"padding": "5px 0",
-				"font-size": "10px"
-			});
-
-			$(".mainstage").css({
-				"overflow": "hidden",
-				"left": 0,
-				"top": $(".sidebar").height() + "px",
-				"width": widthcalc("little") + "px"
-			});
-
-			if ($(".content_thumb").is(":visible")) $(".content_thumb").hide();
-			$(".little_thumb").css({
-				"left": $(".sidebar").width()+($(".container").width()-$(".sidebar").width()-$(".little_thumb").outerWidth())/2,
-				"top": ($(".sidebar").height()-$(".little_thumb").outerHeight())/2
-			});
-			$(".little_thumb").show();
+		if ($(".container").children().length) {
+			$(".container").fadeOut(600, "easeInOutQuad", function () {
+				dothebusiness();
+				$(".container").fadeIn(600, "easeInOutQuad");
+			})
 		}
 		else {
-			if ($(".container").width()/4 < 300) $(".sidebar").css("width", "300px");
-	  		else if ($(".container").width()/4 >= 300) $(".sidebar").css("width", $(".container").width()/4 + "px");
-
-			$(".container").css({
-					"overflow": "hidden"
-	  		});
-
-	  		$(".sidebar").css({
-					"height": $(".container").height() + "px",
-					"padding": "",
-					"clear": "both"
-				});
-
-			$(".sidebar th").css({
-				"padding": "",
-				"font-size": "20px"
-			});
-
-			$(".sidebar td").css({
-				"padding": "",
-				"font-size": ""
-			});
-
-	  		if (!$(".content_thumb").is(":visible")) $(".little_thumb").hide();
-			$(".content_thumb").show();
-
-			var available = $(".sidebar").height();
-			$(".sidebar th").css("height", available/($(".sidebar td").length + 1) + "px");
-			$(".sidebar td").css("height", available/($(".sidebar td").length + 1) + "px");
-
-			$(".mainstage").css({
-				"overflow": "auto",
-				"left": $(".sidebar").outerWidth() + "px",
-				"top": "",
-				"height": $(".container").height() + "px",
-				"width": widthcalc("big") + "px",
-				"padding-right": $(".container").width()-$(".sidebar").outerWidth()-widthcalc("big") + "px"
-			});
+			dothebusiness();
+			$(".container").fadeIn(600, "easeInOutQuad");
 		}
-		/* utility function, for keeping text readable */
-		function widthcalc( size ) {
+		
+		
+		function dothebusiness() {
+			$(".container").css({
+				"visibility": "hidden",
+				"display": "block"
+			});
+			if ( app.shouldBeSkinny ) {
+			
+				$(".sidebar, .sidebar th, .sidebar td, .mainstage").addClass("skinny");
+				
+				$(".container").css({
+						"overflow": "auto"
+		  		});
+	
+				$(".content_thumb").hide();
+				$(".little_thumb").show();
+				
+				$(".sidebar.skinny").css("width", $(".container").width()-$(".little_thumb").outerWidth()-50);
+				$(".mainstage.skinny").css("top", $(".sidebar.skinny").outerHeight() + "px");
+			}
+			else {
+				$(".sidebar, .sidebar th, .sidebar td, .mainstage").removeClass("skinny");
+				
+				if ($(".container").width()/4 < 300) $(".sidebar").css("width", "300px");
+		  		else if ($(".container").width()/4 >= 300) $(".sidebar").css("width", $(".container").width()/4 + "px");
+	
+				$(".container").css({
+						"overflow": "hidden"
+		  		});
+		  		$(".little_thumb").hide();
+				$(".content_thumb").show();
+				
+				$(".sidebar").css("height", $(window).height()-$(".header").outerHeight());
+				var available = $(".sidebar").height();
+				console.log("avail: " + available + ", count: " + $(".sidebar td").length);
+				$(".sidebar th").css("height", available/($(".sidebar td").length + 1)-20 + "px");
+				$(".sidebar td").css("height", available/($(".sidebar td").length + 1) + "px");
+				
+				$(".mainstage").css({
+					"left": $(".sidebar").outerWidth() + "px",
+					"width": widthcalc( "big" )
+				});
+			}
+			
+			$(".container").css({
+				"visibility": "visible",
+				"display": "none"
+			});
+			/* utility function, for keeping text readable */
+			function widthcalc( size ) {
   			if (app.shouldBeSkinny) {
 	  			return $(".container").width();
   			}
@@ -622,6 +612,8 @@ function(app, Project, Controls) {
 				return newwidth;
   			}
   		}
+		}
+		
 	}
 
 
