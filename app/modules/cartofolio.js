@@ -90,10 +90,12 @@ function(app, Project, Controls) {
 				lay.$el
 					.append("<div class='skelback'><div class='skelproj' id='" + model.get("slug") + "'></div></div>");
 					$("#" + model.get("slug")).css("background", 'url("' + model.get("thumbnail") + '") no-repeat center center')
-						.css("-webkit-background-size", "cover")
-						.css("-moz-background-size", "cover")
-						.css("-o-background-size", "cover")
-						.css("background-size", "cover");
+						.css({
+							"-webkit-background-size": "cover",
+							"-moz-background-size": "cover",
+							"-o-background-size": "cover",
+							"background-size": "cover"
+						});
 			
 			
 					var date = app.fixDate(model);
@@ -533,6 +535,53 @@ function(app, Project, Controls) {
 			'<img class="content_thumb" src="' + model.get("thumbnail") + '"></img>',
 			'<div class="maincontent">' + model.get("content") + '</div>'
 		]);
+		
+		// !---- GALLERY ----
+		
+		$(".mainstage").append("<div class='gallery'></div>");
+		
+		var attachments = _(model.get("attachments")).filter(function (attachment) {
+			return attachment.slug.search("icon") == -1;
+		});
+		
+		images = _(attachments).map(function (attch) {
+			return "<div class='gthumb' id='"
+			+ attch.slug
+			+ "' style='background: url("
+			+ attch.images.thumbnail.url
+			+ ")no-repeat center center'><div class='gfill'></div></div>";
+		})
+		
+		$(".gallery").append(images);
+		
+		/* !---- mouse behavior stuff ---- */
+		$(".gfill").mouseenter(function () {
+			$(this).animate({"background-color": "rgba(0,0,0,0.7)"}, 100, "easeInQuad");
+		});
+		$(".gfill").mouseleave(function () {
+			$(this).animate({"background-color": "rgba(0,0,0,0.0)"}, 300, "easeInQuad");
+		});
+		
+		_(attachments).each(function ( attch ) {
+			$("#" + attch.slug).click(function () {
+				var route = 'projects/' + model.get("slug") + '/images/' + attch.slug;
+				console.log(route);
+				var somerouter = new Backbone.Router({});
+				somerouter.navigate(route, {trigger:true});
+			});
+		})
+
+
+
+
+
+		if (model.get("children").length) {
+			var children = _(model.get("children")).map(function (child) {
+				return "<div class='maincontent child'><h1>" + child.title + "</h1>" + child.content + "</div>";
+			});
+			
+			$(".mainstage").append(children);
+		}
 
 		this.sizefix();
 	},
@@ -558,10 +607,6 @@ function(app, Project, Controls) {
 			if ( app.shouldBeSkinny ) {
 			
 				$(".sidebar, .sidebar th, .sidebar td, .mainstage").addClass("skinny");
-				
-				$(".container").css({
-						"overflow": "auto"
-		  		});
 	
 				$(".content_thumb").hide();
 				$(".little_thumb").show();
@@ -574,16 +619,12 @@ function(app, Project, Controls) {
 				
 				if ($(".container").width()/4 < 300) $(".sidebar").css("width", "300px");
 		  		else if ($(".container").width()/4 >= 300) $(".sidebar").css("width", $(".container").width()/4 + "px");
-	
-				$(".container").css({
-						"overflow": "hidden"
-		  		});
+		  		
 		  		$(".little_thumb").hide();
 				$(".content_thumb").show();
 				
 				$(".sidebar").css("height", $(window).height()-$(".header").outerHeight());
 				var available = $(".sidebar").height();
-				console.log("avail: " + available + ", count: " + $(".sidebar td").length);
 				$(".sidebar th").css("height", available/($(".sidebar td").length + 1)-20 + "px");
 				$(".sidebar td").css("height", available/($(".sidebar td").length + 1) + "px");
 				
@@ -617,7 +658,22 @@ function(app, Project, Controls) {
 	}
 
 
-  });
+  }); // end single view
+  
+/*   !==== PHOTO BOX VIEW ==== */
+
+  Cartofolio.Views.Photobox = Backbone.View.extend({
+	  className: "photobox",
+	  
+	  initialize: function () {
+	  	console.log("--- photobox initialized ---");
+	  	this.listenTo(this.model, "change", this.render);
+	  },
+	  
+	  render: function () {
+		  
+	  }
+  }); // end photo box view
 
   // Return the module for AMD compliance.
   return Cartofolio;

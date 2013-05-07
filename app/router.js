@@ -11,7 +11,9 @@ function(app, Cartofolio, Project) {
 	app.timeout = false;
 	app.delta = 200;
 	app.currpage;
+	app.greenlight = {};
 	app.shouldBeSkinny = false;
+	_.extend(app.greenlight, Backbone.Events);
 	
 	// default page view
 	var pageView = Backbone.Layout.extend({
@@ -183,7 +185,6 @@ function(app, Cartofolio, Project) {
 					var cw = $(".container").width();
 					var wh = $(window).height();
 					var ww = $(window).width();
-					console.log(this.firstRender, cw, ch, ww, wh);
 					$(".container").css({
 						"top": (wh-ch)/2 + "px",
 						"left": (ww-cw)/2 + "px"
@@ -239,7 +240,13 @@ function(app, Cartofolio, Project) {
 		"contact": "contact",
 		"resumes": "resumes",
 		"debug": "debug",
+		"projects": "skeleton",
 		"projects/:proj": "single",
+		"projects/:proj/:request/:img": "single",
+		"projects/:proj/*psplat": "single",
+		"skeleton/:proj": "single",
+		"skeleton/:proj/:request/:img": "single",
+		"skeleton/:proj/*psplat": "single",
 		"": "index",
 		"*splat": "splatter"
 	},
@@ -261,23 +268,83 @@ function(app, Cartofolio, Project) {
 		console.log(":: resumes route");
 		switchTo( app.layouts.resumes )
 	},
-	single: function (project) {
-		console.log(":: single project route for " + project);
+	single: function (project, request, item) {
+		console.log(":: single project route for " + project + " req: " + request + " item: " + item);
+		
 		if (project == "skeleton") this.navigate("skeleton", {trigger: true});
 		
-		app.on("viewsready", function () {
-			app.switchSingle(project);
-		});
-		if (typeof app.projviews !== "undefined") {
-			if (app.projviews.length != 1) {
-				app.switchSingle(project);
-			}	
+		if (typeof item !== "undefined" && request == "images") {
+			console.log(":: with this image: " + item);
+			var pb = new Cartofolio.Views.Photobox({});
+			app.greenlight.on("green", function () {
+				console.log("green lit");
+				$(".container").append("<div class='photobox'></div>");
+				$(".photobox").css({
+					"height": $(window).height() - $(".header").outerHeight() + "px",
+					"top": $(".header").outerHeight() + "px",
+					"display": "none",
+					"visibility": "visible"
+				});
+				$(".photobox").on("click", function () {app.greenlight.trigger("red")});
+				
+				$(".photobox").fadeIn(500, "easeInOutQuad", function () {
+				});			
+			});
+			
+			
+			app.greenlight.on("red", function () {
+				$(".photobox").fadeOut(500, "easeInOutQuad", function () {
+					$(".photobox").remove();
+				});
+				app.greenlight.off();
+			});
+			
+			if (typeof app.currpage === "undefined") {
+				activateSingle();
+				console.log("activating single page");
+			}
+			else {
+				console.log("single page already exists");
+				if (!$(".container").children(".photobox").length) {
+					console.log("from here");
+					app.greenlight.trigger("green");
+				}
+			}
+		}
+		else if (typeof item === "undefined" && typeof request !== "undefined") {
+			console.log("bad route: " + request);
+			this.navigate("projects/" + project, {trigger: true});
+		}
+		
+		else {
+			if (typeof request !== "undefined" && request != "images") {
+				console.log("bad route: " + request);
+				this.navigate("projects/" + project, {trigger: true});
+			}
+			else {
+				activateSingle();
+			}
+		}
+		function activateSingle() {
+			app.on("viewsready", function () {
+				app.switchSingle(project, function (view) {
+					console.log("got it: " + view.model.get("title"));
+				});
+			});
+			if (typeof app.projviews !== "undefined") {
+				if (app.projviews.length != 1) {
+					app.switchSingle(project, function (view) {
+						console.log("other got it: " + view.model.get("title"));
+					});
+				}	
+			}
 		}
 	},
+	
 	debug: function() {
 		console.log(":: debug route");
 		
-		console.log($(".container").children());
+		app.greenlight.trigger("red");
 	},
 	index: function() {
 		console.log("index route called.");
@@ -330,13 +397,11 @@ function(app, Cartofolio, Project) {
 		});
 		
 		if ($(".container").children().length) {
-			console.log("do the fade");
 			$(".container").fadeOut(300, "easeInOutQuad", function () {
 				actualswitch();
 			});
 		}
 		else {
-			console.log("don't do the fade");
 			actualswitch();
 		}
 		
@@ -375,7 +440,10 @@ function(app, Cartofolio, Project) {
 								});
 							}
 						}//end fat layouts
-						
+						if (!$(".container").children(".photobox").length) {
+							console.log("from here");
+							app.greenlight.trigger("green");
+						}
 					});//end render done callback
 				});//end nav render done
 			}//end if not home
@@ -393,7 +461,7 @@ function(app, Cartofolio, Project) {
 		}
 	}
 	
-	app.switchSingle = function ( project ) {
+	app.switchSingle = function ( project, callback ) {
 		var singleview;
 		_(app.projviews).map(function ( view ) {
 			if (view.model.get("slug") == project) {
@@ -405,8 +473,9 @@ function(app, Cartofolio, Project) {
 		}
 		else {
 			var newrouter = new Backbone.Router({});
-			newrouter.navigate("", {trigger: true});
+			newrouter.navigate("projects", {trigger: true});
 		}
+		callback(singleview);
 	}
 	
 	app.weightwatcher = function (onresize) {
@@ -416,7 +485,7 @@ function(app, Cartofolio, Project) {
 		else app.shouldBeSkinny = false;
 		
 		if (onresize) app.trigger("weightchange");
-		console.log("current width: " + ww + ". should be skinny? " + app.shouldBeSkinny);
+/* 		console.log("current width: " + ww + ". should be skinny? " + app.shouldBeSkinny); */
 	}
 	
 	app.fixDate = function ( model ) {
