@@ -590,12 +590,16 @@ function(app, Project, Controls) {
 		if ($(".container").children().length) {
 			$(".container").fadeOut(600, "easeInOutQuad", function () {
 				dothebusiness();
-				$(".container").fadeIn(600, "easeInOutQuad");
+				$(".container").fadeIn(600, "easeInOutQuad", function () {
+					app.greenlight.trigger("green");
+				});
 			})
 		}
 		else {
 			dothebusiness();
-			$(".container").fadeIn(600, "easeInOutQuad");
+			$(".container").fadeIn(600, "easeInOutQuad", function () {
+				app.greenlight.trigger("green");
+			});
 		}
 		
 		
@@ -662,16 +666,35 @@ function(app, Project, Controls) {
   
 /*   !==== PHOTO BOX VIEW ==== */
 
-  Cartofolio.Views.Photobox = Backbone.View.extend({
+  Cartofolio.Views.Photobox = Backbone.Layout.extend({
 	  className: "photobox",
-	  
+
 	  initialize: function () {
-	  	console.log("--- photobox initialized ---");
-	  	this.listenTo(this.model, "change", this.render);
+	  	var cmp = this;
+	  	console.log("--- photobox initialized with model " + cmp.model.get("title") + " ---");
 	  },
 	  
-	  render: function () {
-		  
+	  afterRender: function () {
+	  	var cmp = this;
+		console.log("after render");
+		$(".container").append("<div class='photobox'></div>");
+		$(".photobox").css({
+			"height": $(window).height() - $(".header").outerHeight() + "px",
+			"top": $(".header").outerHeight() + "px",
+			"display": "none",
+			"visibility": "visible"
+		});
+
+		$(".photobox").fadeIn(500, "easeInOutQuad", function () {
+		});
+	  },
+	  
+	  destroy: function () {
+	  	var cmp = this;
+		console.log("self destructing");
+		$(".photobox").fadeOut(500, "easeInOutQuad", function () {
+			cmp.remove();
+		});
 	  }
   }); // end photo box view
 

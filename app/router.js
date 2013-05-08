@@ -110,7 +110,7 @@ function(app, Cartofolio, Project) {
 	});
 	
   // Defining the application router, you can attach sub routers here.
-	var mainrouter = Backbone.Router.extend({
+	app.mainrouter = Backbone.Router.extend({
 
 		initialize: function () {
 			
@@ -124,7 +124,7 @@ function(app, Cartofolio, Project) {
 	  		
 			console.log("router initializing...");
 			
-			mainrouter.getPosts(function (data) {	
+			app.mainrouter.getPosts(function (data) {	
 				_.each(data.posts, function(post) {
 					app.numprojects++;
 					Cartofolio.projects.add(post);
@@ -275,29 +275,6 @@ function(app, Cartofolio, Project) {
 		
 		if (typeof item !== "undefined" && request == "images") {
 			console.log(":: with this image: " + item);
-			var pb = new Cartofolio.Views.Photobox({});
-			app.greenlight.on("green", function () {
-				console.log("green lit");
-				$(".container").append("<div class='photobox'></div>");
-				$(".photobox").css({
-					"height": $(window).height() - $(".header").outerHeight() + "px",
-					"top": $(".header").outerHeight() + "px",
-					"display": "none",
-					"visibility": "visible"
-				});
-				$(".photobox").on("click", function () {app.greenlight.trigger("red")});
-				
-				$(".photobox").fadeIn(500, "easeInOutQuad", function () {
-				});			
-			});
-			
-			
-			app.greenlight.on("red", function () {
-				$(".photobox").fadeOut(500, "easeInOutQuad", function () {
-					$(".photobox").remove();
-				});
-				app.greenlight.off();
-			});
 			
 			if (typeof app.currpage === "undefined") {
 				activateSingle();
@@ -306,8 +283,7 @@ function(app, Cartofolio, Project) {
 			else {
 				console.log("single page already exists");
 				if (!$(".container").children(".photobox").length) {
-					console.log("from here");
-					app.greenlight.trigger("green");
+					console.log("from extant singlepage");
 				}
 			}
 		}
@@ -329,6 +305,13 @@ function(app, Cartofolio, Project) {
 			app.on("viewsready", function () {
 				app.switchSingle(project, function (view) {
 					console.log("got it: " + view.model.get("title"));
+					app.greenlight.once("green", function () {
+						var pb = new Cartofolio.Views.Photobox({ model: view.model });
+						app.layouts.mondo.insertView(".container", pb).render();
+					})
+					
+					// set a global event that fires when the fade is done
+					// and use this to determine when to render the pb
 				});
 			});
 			if (typeof app.projviews !== "undefined") {
@@ -344,7 +327,7 @@ function(app, Cartofolio, Project) {
 	debug: function() {
 		console.log(":: debug route");
 		
-		app.greenlight.trigger("red");
+		console.log(app.currpage.model.get("title"));
 	},
 	index: function() {
 		console.log("index route called.");
@@ -357,7 +340,7 @@ function(app, Cartofolio, Project) {
 
 	});
 
-	mainrouter.getPosts = function(callback) {
+	app.mainrouter.getPosts = function(callback) {
 
 		var localcheck = document.URL.search("samgalison.com");
 		//console.log("url: " + document.URL + " - samgalison.com at pos. " + localcheck);
@@ -440,10 +423,6 @@ function(app, Cartofolio, Project) {
 								});
 							}
 						}//end fat layouts
-						if (!$(".container").children(".photobox").length) {
-							console.log("from here");
-							app.greenlight.trigger("green");
-						}
 					});//end render done callback
 				});//end nav render done
 			}//end if not home
@@ -521,6 +500,6 @@ function(app, Cartofolio, Project) {
 	    }               
 	}
 
-  return mainrouter;
+  return app.mainrouter;
 
 });
