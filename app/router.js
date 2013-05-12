@@ -269,21 +269,26 @@ function(app, Cartofolio, Project) {
 		switchTo( app.layouts.resumes )
 	},
 	single: function (project, request, item) {
-		console.log(":: single project route for " + project + " req: " + request + " item: " + item);
+/* 		console.log(":: single project route for " + project + " req: " + request + " item: " + item); */
 		
 		if (project == "skeleton") this.navigate("skeleton", {trigger: true});
 		
 		if (typeof item !== "undefined" && request == "images") {
-			console.log(":: with this image: " + item);
+/* 			console.log(":: with this image: " + item); */
 			
 			if (typeof app.currpage === "undefined") {
-				activateSingle();
-				console.log("activating single page");
+				activateSingle(item);
+/* 				console.log("activating single page"); */
 			}
 			else {
 				console.log("single page already exists");
 				if (!$(".container").children(".photobox").length) {
-					console.log("from extant singlepage");
+/* 					console.log("from extant singlepage"); */
+					var pb = new Cartofolio.Views.Photobox({ 
+						model: app.currpage.model,
+						image: item
+					});
+					app.layouts.mondo.insertView(".container", pb).render();
 				}
 			}
 		}
@@ -301,23 +306,26 @@ function(app, Cartofolio, Project) {
 				activateSingle();
 			}
 		}
-		function activateSingle() {
+		function activateSingle(pbimage) {
 			app.on("viewsready", function () {
 				app.switchSingle(project, function (view) {
-					console.log("got it: " + view.model.get("title"));
-					app.greenlight.once("green", function () {
-						var pb = new Cartofolio.Views.Photobox({ model: view.model });
-						app.layouts.mondo.insertView(".container", pb).render();
-					})
-					
-					// set a global event that fires when the fade is done
-					// and use this to determine when to render the pb
+/* 					console.log("got it: " + view.model.get("title")); */
+					if (typeof pbimage !== "undefined") {
+						app.greenlight.once("green", function () {
+						if (typeof pbimage !== "undefined")
+							var pb = new Cartofolio.Views.Photobox({ 
+								model: view.model,
+								image: pbimage
+							});
+							app.layouts.mondo.insertView(".container", pb).render();
+						})
+					}
 				});
 			});
 			if (typeof app.projviews !== "undefined") {
 				if (app.projviews.length != 1) {
 					app.switchSingle(project, function (view) {
-						console.log("other got it: " + view.model.get("title"));
+/* 						console.log("other got it: " + view.model.get("title")); */
 					});
 				}	
 			}

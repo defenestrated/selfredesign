@@ -667,35 +667,163 @@ function(app, Project, Controls) {
 /*   !==== PHOTO BOX VIEW ==== */
 
   Cartofolio.Views.Photobox = Backbone.Layout.extend({
-	  className: "photobox",
-
+  	  className: "photobox",
+  	  template: "gallery",
+  	  
+  	  images: {},
+  	  
+  	  primage: "",
+  	  crimage: "",
+  	  nximage: "",
+  	  height: $(window).height() - 50,
+  	  
 	  initialize: function () {
 	  	var cmp = this;
-	  	console.log("--- photobox initialized with model " + cmp.model.get("title") + " ---");
+	  	
+	  	cmp.images = _(cmp.model.get("attachments")).filter(function (attachment) {
+			return attachment.slug.search("icon") == -1;
+		});
+	  	
+ 	  	console.log("--- photobox initialized with model " + cmp.model.get("title") + " and image " + cmp.crimage.title + " ---");
+ 	  	
+ 	  	$(document).keydown(function(e) {
+		    if (e.keyCode == 27) {
+		        cmp.destroy();
+		    }
+		});
 	  },
 	  
 	  afterRender: function () {
 	  	var cmp = this;
 		console.log("after render");
-		$(".container").append("<div class='photobox'></div>");
-		$(".photobox").css({
-			"height": $(window).height() - $(".header").outerHeight() + "px",
+		
+		cmp.lineup(cmp.options.image);
+		
+		$("#caption").text(cmp.crimage.title);
+		
+		$(cmp.$el).css({
+			"height": cmp.height + "px",
 			"top": $(".header").outerHeight() + "px",
 			"display": "none",
 			"visibility": "visible"
 		});
+	  
+	  	$("td.prev, td.next").on("click", function (e) {
+	  		
+	  		cmp.turnoff();
+	  		cmp.turnon();
+	  		
+		  	if (e.currentTarget.className == "next") {
+		  		if (typeof cmp.nximage !== "undefined") cmp.lineup(cmp.nximage.slug);
+		  	}
+		    else if (e.currentTarget.className == "prev") {
+			    if (typeof cmp.primage !== "undefined") cmp.lineup(cmp.primage.slug);
+		    }
+	  	});
 
 		$(".photobox").fadeIn(500, "easeInOutQuad", function () {
+			$("td.prev, td.next").css({
+				"width": ($(window).width()-$("img.currimg").width())/2
+			});
+			
+			$("td.curr").css({
+				"width": $("td.currimg").width()
+			});
+			$("tr.text").css({
+				"visibility": "visible",
+				"display" : "none"
+			});
+			$("tr.text").fadeIn();
 		});
+		
+		
 	  },
 	  
 	  destroy: function () {
 	  	var cmp = this;
 		console.log("self destructing");
+		var nr = new Backbone.Router({});
+		nr.navigate("projects/" + cmp.model.get("slug"));
 		$(".photobox").fadeOut(500, "easeInOutQuad", function () {
 			cmp.remove();
 		});
-	  }
+	  },
+	  
+	  lineup: function (desiredCurrent) {
+	  	 var cmp = this;
+		 _(cmp.images).each(function (image, i) {
+		  	if (image.slug == desiredCurrent) {
+		  		cmp.primage = cmp.images[i-1];
+		  		cmp.crimage = image;
+		  		cmp.nximage = cmp.images[i+1];
+		  	}
+		  	var nr = new Backbone.Router({});
+			nr.navigate("projects/" + cmp.model.get("slug") + "/images/" + cmp.crimage.slug);
+	  	});
+	  	
+	  	(typeof cmp.primage !== "undefined") ? console.log("previous: " + cmp.primage.slug) : console.log("no previous");
+	  	(typeof cmp.crimage !== "undefined") ? console.log("current: " + cmp.crimage.slug) : console.log("no current");
+	  	(typeof cmp.nximage !== "undefined") ? console.log("next: " + cmp.nximage.slug) : console.log("no next");
+	  	
+	  	($("img.currimg").length) ?
+	  		$("img.currimg").attr("src", cmp.crimage.images.large.url)
+		  	: $("td.currimg").append("<img class='currimg' src='" + cmp.crimage.images.large.url + "' height=" + cmp.height + "></img>");
+		
+		if (typeof cmp.primage !== "undefined") {
+			$("td.previmg").css("background", "url('" + cmp.primage.images.large.url + "') no-repeat center center");
+			$("td.prev").css("cursor", "pointer");
+			$("td.prev p").text(cmp.primage.title);
+		}
+		else {
+			$("td.prev").css("cursor", "");
+			$("td.prev").off("mouseenter mouseleave");
+			$("td.previmg").css("background", "");
+			$("td.prev p").text("");
+			$("td.prev p").css("background", "");
+			
+		}
+		if (typeof cmp.nximage !== "undefined") {
+			$("td.nextimg").css("background", "url('" + cmp.nximage.images.large.url + "') no-repeat center center");
+			$("td.next").css("cursor", "pointer");
+			$("td.next p").text(cmp.nximage.title);
+		}
+		
+		$("td.prev, td.next").on('mouseenter', function (e) {
+	  		if ($("." + e.currentTarget.className + " p").text() != "") {
+		  		$("." + e.currentTarget.className + "img").animate({"opacity": 0.5}, 200, "easeInOutQuad");
+		  		$("." + e.currentTarget.className + " p").animate({"background-color": "rgba(255,255,255,0.3)"}, 200, "easeInOutQuad");
+	  		}
+	  	});
+	  	$("td.prev, td.next").on('mouseleave', function (e) {
+	  		if ($("." + e.currentTarget.className + " p").text() != "") {
+			  	$("." + e.currentTarget.className + "img").animate({"opacity": 0.05}, 200, "easeInOutQuad");
+			  	$("." + e.currentTarget.className + " p").animate({"background-color": "rgba(255,255,255,0.0)"}, 200, "easeInOutQuad");
+		  	}
+	  	});
+				
+		
+		$("tr.text td").css("height", cmp.height);
+		$("td.previmg, td.nextimg, td.prev, td.next").css({
+			"width": ($(window).width()-$("img.currimg").width())/2
+		});
+		$("td.curr").css({
+			"width": $("td.currimg").width()
+		});
+	  },
+	  
+	  /* PUT THE MOUSEOVER EVENTS IN THE TURNOFF / TURNON FUNCTIONS SO YOU CAN KILL THEM WHILE FLIPPING THROUGH PICTURES */
+	  
+	  turnoff: function () {
+		  console.log("off");
+		  $.fx.off = true;
+	  },
+	  
+	  turnon: _.debounce(function () {
+		  console.log("back on");
+		  $.fx.off = false;
+	  }, 200),
+	  
+	  
   }); // end photo box view
 
   // Return the module for AMD compliance.

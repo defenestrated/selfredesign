@@ -281,6 +281,8 @@ a.logo {
 
 table {
 	border-collapse: collapse !important;
+	border-spacing: 0px !important;
+	border: 0px rgba(0,0,0,0) !important;
 }
 
 .sidetable th {
@@ -353,6 +355,8 @@ table {
 	line-height: 1.2em;
 }
 
+/* !- - - - - - gallery - - - - - -*/
+
 .gthumb {
 	border: 2px solid black;
 	width: 100px;
@@ -374,11 +378,78 @@ table {
 	position: fixed;
 	visibility: hidden;
 	width: 100%;
-	height: 100%;
 	top: 0;
 	left: 0;
-	background: rgba(255,255,255,0.8);
+	background: rgba(125,125,125,.98);
 }
+
+table.gallery {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+}
+
+td.previmg, td.nextimg {
+	opacity: 0.05;
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover;
+}
+
+td.currimg {
+	vertical-align: top;
+	width: auto;
+}
+
+img.currimg {
+	margin-top: 0;
+	z-index: 2;
+}
+
+tr.text {
+	position: absolute;
+	top: 0;
+	visibility: hidden;
+	font: italic normal 14px/1.2em "FuturaBk", "Lucida Console", monospace;
+}
+
+.text p {
+	-webkit-margin-before: 0px;
+	-webkit-margin-after: 0px;
+	-webkit-margin-start: 0px;
+	-webkit-margin-end: 0px;
+	margin-bottom: 0px;
+	padding: 1em 2em;
+}
+
+td.prev, td.next {
+	vertical-align: middle;
+	font-style: normal;
+	font-size: 16px;
+	letter-spacing: 0.1em;
+}
+
+td.prev {
+	text-align: left;
+}
+
+td.next {
+	text-align: right;
+}
+
+
+td.curr {
+	vertical-align: bottom;
+	text-align: center;
+}
+
+.text #caption {
+	background: rgba(255,255,255,0.7);
+}
+
 
 /* !-------------   svg   --------------- */
 
