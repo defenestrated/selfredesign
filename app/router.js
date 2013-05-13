@@ -7,12 +7,13 @@ define([
 
 function(app, Cartofolio, Project) {
 
-	app.rtime = new Date(1, 1, 2000, 12,00,00);
-	app.timeout = false;
-	app.delta = 200;
 	app.currpage;
 	app.greenlight = {};
 	app.shouldBeSkinny = false;
+	app.sp = "";
+	app.sr = "";
+	app.si = "";
+	
 	_.extend(app.greenlight, Backbone.Events);
 	
 	// default page view
@@ -225,11 +226,7 @@ function(app, Cartofolio, Project) {
 			});
 			
 			$(window).resize(function() {
-				app.rtime = new Date();
-			    if (app.timeout === false) {
-			        app.timeout = true;
-			        setTimeout(app.resizeend, app.delta);
-			    }
+				app.resize();
 			});
 		},
 		
@@ -240,6 +237,7 @@ function(app, Cartofolio, Project) {
 		"contact": "contact",
 		"resumes": "resumes",
 		"debug": "debug",
+		"close": "close",
 		"projects": "skeleton",
 		"projects/:proj": "single",
 		"projects/:proj/:request/:img": "single",
@@ -269,67 +267,15 @@ function(app, Cartofolio, Project) {
 		switchTo( app.layouts.resumes )
 	},
 	single: function (project, request, item) {
-/* 		console.log(":: single project route for " + project + " req: " + request + " item: " + item); */
-		
-		if (project == "skeleton") this.navigate("skeleton", {trigger: true});
-		
-		if (typeof item !== "undefined" && request == "images") {
-/* 			console.log(":: with this image: " + item); */
-			
-			if (typeof app.currpage === "undefined") {
-				activateSingle(item);
-/* 				console.log("activating single page"); */
-			}
-			else {
-				console.log("single page already exists");
-				if (!$(".container").children(".photobox").length) {
-/* 					console.log("from extant singlepage"); */
-					var pb = new Cartofolio.Views.Photobox({ 
-						model: app.currpage.model,
-						image: item
-					});
-					app.layouts.mondo.insertView(".container", pb).render();
-				}
-			}
-		}
-		else if (typeof item === "undefined" && typeof request !== "undefined") {
-			console.log("bad route: " + request);
-			this.navigate("projects/" + project, {trigger: true});
-		}
-		
-		else {
-			if (typeof request !== "undefined" && request != "images") {
-				console.log("bad route: " + request);
-				this.navigate("projects/" + project, {trigger: true});
-			}
-			else {
-				activateSingle();
-			}
-		}
-		function activateSingle(pbimage) {
-			app.on("viewsready", function () {
-				app.switchSingle(project, function (view) {
-/* 					console.log("got it: " + view.model.get("title")); */
-					if (typeof pbimage !== "undefined") {
-						app.greenlight.once("green", function () {
-						if (typeof pbimage !== "undefined")
-							var pb = new Cartofolio.Views.Photobox({ 
-								model: view.model,
-								image: pbimage
-							});
-							app.layouts.mondo.insertView(".container", pb).render();
-						})
-					}
-				});
-			});
-			if (typeof app.projviews !== "undefined") {
-				if (app.projviews.length != 1) {
-					app.switchSingle(project, function (view) {
-/* 						console.log("other got it: " + view.model.get("title")); */
-					});
-				}	
-			}
-		}
+		app.sp = project;
+		app.sr = request;
+		app.si = item;
+		app.callSingle(app.sp, app.sr, app.si);
+	},
+	
+	close: function () {
+		console.log("CLOSE ROUTE");
+		app.pb.destroy();
 	},
 	
 	debug: function() {
@@ -337,6 +283,7 @@ function(app, Cartofolio, Project) {
 		
 		console.log(app.currpage.model.get("title"));
 	},
+	
 	index: function() {
 		console.log("index route called.");
 		switchTo( app.layouts.home );
@@ -465,14 +412,79 @@ function(app, Cartofolio, Project) {
 		callback(singleview);
 	}
 	
+	app.callSingle = function (project, request, item) {
+		console.log(":: single project route for " + project + " req: " + request + " item: " + item);
+		
+		if (project == "skeleton") this.navigate("skeleton", {trigger: true});
+		
+		if (typeof item !== "undefined" && request == "images") {
+/* 			console.log(":: with this image: " + item); */
+			
+			if (typeof app.currpage === "undefined") {
+				activateSingle(item);
+/* 				console.log("activating single page"); */
+			}
+			else {
+				console.log("single page already exists");
+				if (!$(".container").children(".photobox").length) {
+/* 					console.log("from extant singlepage"); */
+					app.pb = new Cartofolio.Views.Photobox({ 
+						model: app.currpage.model,
+						image: item
+					});
+					app.layouts.mondo.insertView(".container", app.pb).render();
+				}
+				else app.pb.sizefix();
+			}
+		}
+		else if (typeof item === "undefined" && typeof request !== "undefined") {
+			console.log("bad route: " + request);
+			this.navigate("projects/" + project, {trigger: true});
+		}
+		
+		else {
+			if (typeof request !== "undefined" && request != "images") {
+				console.log("bad route: " + request);
+				this.navigate("projects/" + project, {trigger: true});
+			}
+			else {
+				activateSingle();
+			}
+		}
+		function activateSingle(pbimage) {
+			app.on("viewsready", function () {
+				app.switchSingle(project, function (view) {
+/* 					console.log("got it: " + view.model.get("title")); */
+					if (typeof pbimage !== "undefined") {
+						app.greenlight.once("green", function () {
+						if (typeof pbimage !== "undefined")
+							app.pb = new Cartofolio.Views.Photobox({ 
+								model: view.model,
+								image: pbimage
+							});
+							app.layouts.mondo.insertView(".container", app.pb).render();
+						})
+					}
+				});
+			});
+			if (typeof app.projviews !== "undefined") {
+				if (app.projviews.length != 1) {
+					app.switchSingle(project, function (view) {
+/* 						console.log("other got it: " + view.model.get("title")); */
+					});
+				}	
+			}
+		}
+	}
+	
 	app.weightwatcher = function (onresize) {
 		var ww = $(window).width();
 		
-		if (ww < 830) app.shouldBeSkinny = true;
+		if (ww < 1000) app.shouldBeSkinny = true;
 		else app.shouldBeSkinny = false;
 		
 		if (onresize) app.trigger("weightchange");
-/* 		console.log("current width: " + ww + ". should be skinny? " + app.shouldBeSkinny); */
+		console.log("current width: " + ww + ". should be skinny? " + app.shouldBeSkinny);
 	}
 	
 	app.fixDate = function ( model ) {
@@ -498,15 +510,10 @@ function(app, Cartofolio, Project) {
 	}
 		
 /* 	!end resize fn */
-	app.resizeend = function() {
-	    if (new Date() - app.rtime < app.delta) {
-	        setTimeout(app.resizeend, app.delta);
-	    } else {
-	        app.timeout = false;
-        	app.weightwatcher(true);
-        	switchTo( app.currpage );
-	    }               
-	}
+	app.resize = _.debounce(function() {
+    	app.weightwatcher(true);
+    	(app.currpage.className == "single") ? app.callSingle(app.sp, app.sr, app.si) : switchTo( app.currpage );
+	}, 500);
 
   return app.mainrouter;
 
