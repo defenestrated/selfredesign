@@ -709,15 +709,16 @@ function(app, Project, Controls) {
 			"visibility": "visible"
 		});
 
-		$(".closegallery").on("click", function () {cmp.destroy()});
+		$("td.cg").on("click", function () {cmp.destroy()});
 
-	  	$("td.prev, td.next").on("click", function (e) {
+	  	$("td.prev, td.next, td.prevs, td.nexts").on("click", function (e) {
+	  		console.log(e.currentTarget.className);
 	  		cmp.turnoff();
 	  		cmp.turnon();
-		  	if (e.currentTarget.className == "next") {
+		  	if (e.currentTarget.className == "next" || e.currentTarget.className == "nexts") {
 		  		if (typeof cmp.nximage !== "undefined") cmp.lineup(cmp.nximage.slug);
 		  	}
-		    else if (e.currentTarget.className == "prev") {
+		    else if (e.currentTarget.className == "prev" || e.currentTarget.className == "prevs") {
 			    if (typeof cmp.primage !== "undefined") cmp.lineup(cmp.primage.slug);
 		    }
 	  	});
@@ -733,7 +734,7 @@ function(app, Project, Controls) {
 	  	var cmp = this;
 		console.log("self destructing");
 		var nr = new Backbone.Router({});
-		nr.navigate("projects/" + cmp.model.get("slug"));
+		nr.navigate("projects/" + cmp.model.get("slug"), {trigger: true});
 		$(".photobox").fadeOut(500, "easeInOutQuad", function () {
 			cmp.remove();
 		});
@@ -762,23 +763,28 @@ function(app, Project, Controls) {
 			$("td.previmg").css("background", "url('" + cmp.primage.images.large.url + "') no-repeat center center");
 			$("td.prev").css("cursor", "pointer");
 			$("td.prev p").text(cmp.primage.title);
+			$("td.prevs").text("prev");
 		}
 		else {
 			$("td.prev").css("cursor", "");
 			$("td.previmg").css("background-image", "");
 			$("td.prev p").text("").css("background", "");
+			$("td.prevs").text("");
 		}
 		if (typeof cmp.nximage !== "undefined") {
 			$("td.nextimg").css("background", "url('" + cmp.nximage.images.large.url + "') no-repeat center center");
 			$("td.next").css("cursor", "pointer");
 			$("td.next p").text(cmp.nximage.title);
+			$("td.nexts").text("next");
 		}
 		else {
 			$("td.next").css("cursor", "");
 			$("td.nextimg").css("background-image", "");
 			$("td.next p").text("").css("background", "");
+			$("td.nexts").text("");
 		}
-
+		
+		
 		$("tr.text td").css("height", cmp.height);
 		$("td.previmg, td.nextimg, td.prev, td.next").css({
 			"width": ($(window).width()-$("img.currimg").width())/2
@@ -845,19 +851,7 @@ function(app, Project, Controls) {
 		  		}
 		  		
 		  		
-/*
-				if (typeof cmp.primage !== 'undefined' && $(".closegallery a.prev").length == 0) 
-					$(".closegallery").prepend("<a class='prev' href='javascript:void(0)' onclick='prv();'>[prev]</a>");
-				if (typeof cmp.nximage !== 'undefined' && $(".closegallery a.next").length == 0) 
-					$(".closegallery").append("<a class='next' href='javascript:void(0)' onclick='nxt();'>[next]</a>");
-					
-				prv = function () {
-					cmp.lineup(cmp.primage.slug);
-				}
-				nxt = function () {
-					cmp.lineup(cmp.nximage.slug);
-				}
-*/
+				
 				
 
 

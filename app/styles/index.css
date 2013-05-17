@@ -69,6 +69,11 @@ p {
 	margin-bottom: 1em;
 }
 
+.resumes p, .contact p {
+	font-size: 14px;
+	letter-spacing: 0.15em;
+}
+
 #mondo {
 	position: absolute;
 	left: 0;
@@ -89,6 +94,12 @@ p {
 	left: 0;
 	top: 0;
 	overflow: auto;
+}
+
+.container a {
+	font: inherit;
+	letter-spacing: inherit;
+	word-spacing: inherit;
 }
 
 .container.skinny {
@@ -505,7 +516,7 @@ td.curr p {
    	cursor: pointer;
 }
 
-.closegallery td {
+.closegallery td, .closegallery td a {
 	text-transform: uppercase;
 	letter-spacing: 0.1em;
 	font-weight: bold;
@@ -516,10 +527,8 @@ td.curr p {
    	transition:color 			.5s ease-in-out;
 }
 
-.closegallery:hover > td {
+.closegallery td:hover, .closegallery td:hover > a  {
 	color: rgb(251,255,103);
-}
-.closegallery:hover {
 	background: rgb(40,40,40);
 }
 

@@ -29,7 +29,7 @@ function(app, Cartofolio, Project) {
 		},
 		
 		afterRender: function () {
-			console.log(this.className + " rendering for the first time? " + this.firstRender);
+/* 			console.log(this.className + " rendering for the first time? " + this.firstRender); */
 			
 			$(".container").css({
 				"width": "",
@@ -250,20 +250,20 @@ function(app, Cartofolio, Project) {
 	},
 
 	carto: function() {
-		console.log(":: carto route");
+/* 		console.log(":: carto route"); */
 		app.layouts.mondo.setView(".container", app.layouts.carto).render();			
 	},
 	skeleton: function() {
-		console.log(":: skeleton route");
+/* 		console.log(":: skeleton route"); */
 		switchTo( app.layouts.skel );
 		//app.layouts.skel.showprojects();
 	},
 	contact: function() {
-		console.log(":: contact route");
+/* 		console.log(":: contact route"); */
 		switchTo( app.layouts.contact )
 	},
 	resumes: function() {
-		console.log(":: resumes route");
+/* 		console.log(":: resumes route"); */
 		switchTo( app.layouts.resumes )
 	},
 	single: function (project, request, item) {
@@ -274,7 +274,7 @@ function(app, Cartofolio, Project) {
 	},
 	
 	close: function () {
-		console.log("CLOSE ROUTE");
+/* 		console.log("CLOSE ROUTE"); */
 		app.pb.destroy();
 	},
 	
@@ -285,11 +285,11 @@ function(app, Cartofolio, Project) {
 	},
 	
 	index: function() {
-		console.log("index route called.");
+/* 		console.log("index route called."); */
 		switchTo( app.layouts.home );
 	},
 	splatter: function (splat) {
-		console.log("splat: " + splat);
+/* 		console.log("splat: " + splat); */
 		this.navigate("", { trigger: true });
 	}
 
@@ -413,7 +413,7 @@ function(app, Cartofolio, Project) {
 	}
 	
 	app.callSingle = function (project, request, item) {
-		console.log(":: single project route for " + project + " req: " + request + " item: " + item);
+/* 		console.log(":: single project route for " + project + " req: " + request + " item: " + item); */
 		
 		if (project == "skeleton") this.navigate("skeleton", {trigger: true});
 		
@@ -425,7 +425,7 @@ function(app, Cartofolio, Project) {
 /* 				console.log("activating single page"); */
 			}
 			else {
-				console.log("single page already exists");
+/* 				console.log("single page already exists"); */
 				if (!$(".container").children(".photobox").length) {
 /* 					console.log("from extant singlepage"); */
 					app.pb = new Cartofolio.Views.Photobox({ 
@@ -484,7 +484,7 @@ function(app, Cartofolio, Project) {
 		else app.shouldBeSkinny = false;
 		
 		if (onresize) app.trigger("weightchange");
-		console.log("current width: " + ww + ". should be skinny? " + app.shouldBeSkinny);
+/* 		console.log("current width: " + ww + ". should be skinny? " + app.shouldBeSkinny); */
 	}
 	
 	app.fixDate = function ( model ) {
