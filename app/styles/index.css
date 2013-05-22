@@ -533,7 +533,18 @@ td.curr p {
 }
 
 
+/* !-------------   carto   --------------- */
+
+
+
 /* !-------------   svg   --------------- */
+.cf-wrapper {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
 
 .content {
 	position: absolute;
@@ -556,7 +567,11 @@ g.node {
 }
 
 g.node:hover circle.orbcircle {
-	fill: rgba(255,255,0,1);
+	fill: rgba(251,255,103,1);
+}
+
+g.node .label {
+	background: rgba(0,0,0,0.3);
 }
 
 /* links */

@@ -213,9 +213,7 @@ function(app, Cartofolio, Project) {
 				className: "debug"
 			});
 			
-			app.layouts.skel = new Cartofolio.Views.Skeletonview({
-				
-			});
+			app.layouts.skel = new Cartofolio.Views.Skeletonview({});
 			app.layouts.carto = new Cartofolio.Views.Mapview({});
 			
 			Cartofolio.elders.on("reset", function () {
@@ -251,7 +249,7 @@ function(app, Cartofolio, Project) {
 
 	carto: function() {
 /* 		console.log(":: carto route"); */
-		app.layouts.mondo.setView(".container", app.layouts.carto).render();			
+		switchTo( app.layouts.carto );
 	},
 	skeleton: function() {
 /* 		console.log(":: skeleton route"); */
@@ -281,7 +279,7 @@ function(app, Cartofolio, Project) {
 	debug: function() {
 		console.log(":: debug route");
 		
-		console.log(app.currpage.model.get("title"));
+		switchTo( app.layouts.carto );
 	},
 	
 	index: function() {
@@ -344,8 +342,8 @@ function(app, Cartofolio, Project) {
 		}
 		
 		function actualswitch() {
-			/* for all pages except home */
-			if (newlayout.className != "home") {
+			/* for all pages except home and map */
+			if (newlayout.className != "home" && newlayout.className != "cartofolio") {
 				app.layouts.mondo.setView(".header", app.layouts.nav).render().done(function () {
 					var buffer = 20;
 					var ww = $(window).width();
@@ -382,8 +380,8 @@ function(app, Cartofolio, Project) {
 				});//end nav render done
 			}//end if not home
 			
-			/* for the home page */
-			else if (newlayout.className == "home") {
+			/* for the home and map pages */
+			else if (newlayout.className == "home" || newlayout.className == "cartofolio") {
 				app.layouts.nav.firstRender = true;
 				if ( $(".header").is(":visible") ) {
 					$(".header").fadeOut(1000, "easeInOutQuad");

@@ -147,7 +147,7 @@ function(app, Project, Controls) {
   Cartofolio.Views.Mapview = Backbone.Layout.extend({
 
 		template: "cartofolio",
-		className: "cartofolio_parchment",
+		className: "cartofolio",
 
 
 		projectgroup: {},
@@ -159,7 +159,7 @@ function(app, Project, Controls) {
 		lastY: 0,
 		firstRender: true,
 		sidebar: 100,
-		r: 20,
+		r: 10,
 		s: 0,
 		maptype: "random",
 		nodes: [],
@@ -191,24 +191,38 @@ function(app, Project, Controls) {
 		sizefix: function () {},
 
 		afterRender: function() {
-	 	var lay = this;
+	 	var cmp = this;
+	 	
+	 	$(".container").css({
+		 	"width": "100%",
+		 	"height": "100%",
+		 	"top": 0,
+		 	"left": 0,
+		 	"visibility": "visible",
+		 	"display": "none"
+	 	});
+	 	
+	 	$(".container").fadeIn();
+	 	
+		if (cmp.firstRender) {
 
-		if (lay.firstRender) {
-			lay.firstRender = false;
+			cmp.w = $(window).width();
+			cmp.h = $(window).height();
+			cmp.s = 2*cmp.r/150;
+			cmp.format = d3.time.format("%Y-%m-%d %H:%M:%S");
+			cmp.setbuffer();
+			
+			Cartofolio.elders.on("greenlight", function () {
+				console.log("done with the elders");
+				console.log(_(Cartofolio.elders.models).map(function (model) {
+					return model.get("title");
+				}));
+				cmp.d3_dom();
+				cmp.setup_d3();
+			});
+			
 
-
-			lay.w = $(window).width();
-			lay.h = $(window).height();
-			lay.s = 2*lay.r/150;
-			lay.format = d3.time.format("%Y-%m-%d %H:%M:%S");
-			lay.setbuffer();
-
-
-
-			lay.d3_dom();
-			lay.setup_d3();
-
-			Cartofolio.projects.bind("all", lay.d3_update);
+			Cartofolio.projects.bind("all", cmp.d3_update);
 
 			var rtime = new Date(1, 1, 2000, 12,00,00);
 			var timeout = false;
@@ -227,25 +241,25 @@ function(app, Project, Controls) {
 				   } else {
 						timeout = false;
 			/*			 console.log("window: " + $(window).width() + ", " + $(window).height()); */
-						lay.arrange("random");
+						cmp.arrange("random");
 				   }
 			}
+			cmp.firstRender = false;
 		}
 	},
 
 		/*  !cartofolio init	*/
 		initialize: function () {
 		_.bindAll(this);
-
 		var cmp = this;
 
 	},
 
 
 		d3_dom: function() {
-		var lay = this;
+		var cmp = this;
 
-		lay.parchment = d3.select(".cartofolio_wrapper").append("svg")
+		cmp.parchment = d3.select(".cf-wrapper").append("svg")
 			.attr("class", "parchment")
 			.attr("width", "100%")
 			.attr("height", "100%")
@@ -253,7 +267,7 @@ function(app, Project, Controls) {
 
 		// !buttons
 
-		var sortbuttons = lay.parchment.append("g")
+		var sortbuttons = cmp.parchment.append("g")
 			.attr("id", "sortbuttons");
 
 		var Bscramble = sortbuttons.append("g")
@@ -264,53 +278,31 @@ function(app, Project, Controls) {
 		Bscramble.append("text") // button text
 				.attr("class", "link")
 				.text("scramble")
-				.attr("x", lay.w-lay.sidebar)
-				.attr("y", lay.parchment.selectAll("text.link")[0].length*40);
+				.attr("x", cmp.w-cmp.sidebar)
+				.attr("y", cmp.parchment.selectAll("text.link")[0].length*40);
 
 		Bscramble.insert("ellipse", "text") //background circle
 				.attr("class", "link")
 				.attr("rx", function () { return Bscramble.select("text")[0][0].clientWidth*3/4; })
 				.attr("ry", 20)
-				.attr("cx", lay.w-lay.sidebar)
-				.attr("cy", lay.parchment.selectAll("text.link")[0].length*40)
+				.attr("cx", cmp.w-cmp.sidebar)
+				.attr("cy", cmp.parchment.selectAll("text.link")[0].length*40)
 				.attr("stroke", "black")
 				.attr("stroke-width", "2pt");
-
-		var Bshrink = sortbuttons.append("g")
-				.attr("class", "link")
-				.attr("id", "shrink")
-				;
-
-		Bshrink.append("text") // button text
-				.attr("class", "link")
-				.text("shrink")
-				.attr("x", lay.w-lay.sidebar)
-				.attr("y", lay.parchment.selectAll("text.link")[0].length*40);
-
-		Bshrink.insert("ellipse", "text") //background circle
-				.attr("class", "link")
-				.attr("rx", function () { return Bshrink.select("text")[0][0].clientWidth*3/4; })
-				.attr("ry", 20)
-				.attr("cx", lay.w-lay.sidebar)
-				.attr("cy", lay.parchment.selectAll("text.link")[0].length*40)
-				.attr("stroke", "black")
-				.attr("stroke-width", "2pt");
-
-
 
 		Cartofolio.elders.models.forEach(function(d, i) {
 			d.x = $(window).width()/2;
 			d.y = $(window).height()/2;
 			d.x0 = $(window).width()/2;
 			d.y0 = $(window).height()/2;
-			d.r = lay.r;
+			d.r = cmp.r;
 		});
 
 		// !force
 
-		lay.force = d3.layout.force()
+		cmp.force = d3.layout.force()
 			.nodes(Cartofolio.elders.models)
-			.on("tick", lay.tick)
+			.on("tick", cmp.tick)
 			.gravity(0)
 			.friction(0.9)
 			.start();
@@ -319,69 +311,64 @@ function(app, Project, Controls) {
 		// !nodes
 
 
-		lay.node = lay.parchment.selectAll(".node")
+		cmp.node = cmp.parchment.selectAll(".node")
 				.data(Cartofolio.elders.models)
 			.enter().append("g")
 				.attr("class", "node")
-				.call(lay.force.drag);
+				.call(cmp.force.drag);
 
 
-		lay.node.append("circle")
+		cmp.node.append("circle")
 			.attr("class", "orbcircle")
-			.attr("r", lay.r)
+			.attr("r", cmp.r)
 			;
 
-		lay.node.append("clipPath")
+		cmp.node.append("clipPath")
 					.attr("id", function(d) { return d.get("slug"); })
 				.append("circle")
 					.attr("class", "orbclip")
-					.attr("r", lay.r)
+					.attr("r", cmp.r)
 					;
 
-		lay.node.append("g")
+		cmp.node.append("g")
 					.attr("class", "clip_group")
 					.attr("clip-rule", "nonzero")
 					.attr("id", function(d) { return d.get("slug") + "_to_clip"; })
 					.attr("clip-path", function(d) { return "url(#" + d.get("slug") + ")"; })
 				.append("image")
-					.attr("x", lay.ux(0))
-					.attr("y", lay.uy(0))
+					.attr("x", cmp.ux(0))
+					.attr("y", cmp.uy(0))
 					.attr("width", 150)
 					.attr("height", 150)
-					.attr("transform", "scale(" + lay.s + ")")
+					.attr("transform", "scale(" + cmp.s + ")")
 					.attr("xlink:href", function (d) { return d.get("thumbnail"); })
 					;
-		d3.selectAll("g.node").on("mouseover", function (d) {
-			var cmp = this;
-			lay.force.resume();
-			d3.transition().tween(d.r, function() {
-				var i = d3.interpolate(d.r, 75);
-				return function(t) {
-					d.r = i(t);
-					d3.select(cmp).select("circle.orbclip").attr("r", d.r);
-					d3.select(cmp).select("circle.orbcircle").attr("r", d.r);
-				};
-			});
+		
+		var label = cmp.node.append("g")
+					.attr("class", "label")
+					.attr("id", function (d) { return d.get("slug"); })
+					;
+		
+		var ltext = label.append("text")
+					.text(function (d) { return d.get("title"); })
+					.attr("x", function ( d ) { return cmp.r + 10 })
+					.attr("y", function ( d ) {	return 0 })
+					.attr("dy", "0.3em")
+					;
+		
+		
+		
+		console.log(ltext);
+		var tw = ltext.select().node().getComputedTextLength();
+		console.log(tw);
+		// !BROKEN
+		label.insert("rect", ".label text")
+					.attr("x", function ( d ) { return cmp.r + 10 })
+					.attr("y", function ( d ) {	return 0 })
+					.attr("width", function (d) {
+						 })
+					.attr("height", 20);
 
-
-
-			d3.select(cmp).select("g.clip_group").transition().attr("transform", "scale(" + 1/lay.s + ")");
-		});
-
-		d3.selectAll("g.node").on("mouseout", function (d) {
-			lay.force.resume();
-			var cmp = this;
-			d3.transition().tween(d.r, function() {
-				var i = d3.interpolate(d.r, lay.r);
-				return function(t) {
-					d.r = i(t);
-					d3.select(cmp).select("circle.orbclip").attr("r", d.r);
-					d3.select(cmp).select("circle.orbcircle").attr("r", d.r);
-				};
-			});
-
-			d3.select(cmp).select("g.clip_group").transition().attr("transform", "scale(" + 1 + ")");
-		});
 	},
 
 		setup_d3: function () {
@@ -390,9 +377,9 @@ function(app, Project, Controls) {
 
 		// !force fn's
 		tick: function(e) {
-		var lay = this;
-		 lay.node.each(lay.gravity(e.alpha * 0.7))
-			 .each(lay.collide(0.5))
+		var cmp = this;
+		 cmp.node.each(cmp.gravity(e.alpha * 0.7))
+			 .each(cmp.collide(0.5))
 			 .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
 			 ;
 	},
@@ -405,10 +392,10 @@ function(app, Project, Controls) {
 	},
 
 		collide: function(k) {
-		var lay = this;
+		var cmp = this;
 		var q = d3.geom.quadtree(Cartofolio.elders.models);
 		 return function(node) {
-			 var nr = node.r + lay.padding,
+			 var nr = node.r + cmp.padding,
 				  nx1 = node.x - nr,
 				  nx2 = node.x + nr,
 				  ny1 = node.y - nr,
@@ -436,52 +423,55 @@ function(app, Project, Controls) {
 		test: function test() { console.log("testing"); },
 
 		arrange: function (e) {
-		var lay = this;
-		var kind = '';
-
-		if ($(e.target).parent().attr("id") != undefined) { kind = $(e.target).parent().attr("id"); }
-		else kind = e;
-
-		console.log("arranging by " + kind);
-
-		lay.setbuffer();
-
-		if (kind == "random") {
-			Cartofolio.elders.models.forEach(function(d, i) {
-				d.x0 = Math.random()*(lay.xmax-lay.xmin) + lay.xmin+1;
-				d.y0 = Math.random()*(lay.ymax-lay.ymin) + lay.ymin+1;
-				d.r = lay.r;
-			});
+			var cmp = this;
+			var kind = '';
+	
+			if ($(e.target).parent().attr("id") != undefined) { kind = $(e.target).parent().attr("id"); }
+			else kind = e;
+	
+			console.log("arranging by " + kind);
+	
+			cmp.setbuffer();
+	
+			if (kind == "random") {
+				Cartofolio.elders.models.forEach(function(d, i) {
+					d.x0 = Math.random()*(cmp.xmax-cmp.xmin) + cmp.xmin+1;
+					d.y0 = Math.random()*(cmp.ymax-cmp.ymin) + cmp.ymin+1;
+					d.r = cmp.r;
+				});
 		}
 
 
-		lay.force.resume();
+		cmp.force.resume();
 	},
 
 			/* -------------------------------------------------- */
 
 
 		setbuffer: function() {
-		var lay = this;
+		var cmp = this;
 
-		lay.w = $(window).width();
-		lay.h = $(window).height();
+		cmp.w = $(window).width();
+		cmp.h = $(window).height();
 
-		if (lay.w >= lay.h) {
-			lay.buffer = lay.h/5;
-			lay.r = Math.round(lay.buffer/4);
+		if (cmp.w >= cmp.h) {
+			cmp.buffer = cmp.h/5;
+			cmp.r = Math.round(cmp.buffer/6);
 		}
 		else {
-			lay.buffer = lay.w/5;
-			lay.r = Math.round(lay.buffer/4);
+			cmp.buffer = cmp.w/5;
+			cmp.r = Math.round(cmp.buffer/6);
 		}
 
-		lay.s = 2*lay.r/150;
-		lay.xmin = lay.buffer;
-		lay.xmax = (lay.w-lay.buffer-lay.sidebar);
-		lay.ymax = lay.h-lay.buffer*1.5;
-		lay.ymin = lay.buffer;
+
+		cmp.s = 2*cmp.r/150;
+		cmp.xmin = cmp.buffer;
+		cmp.xmax = (cmp.w-cmp.buffer-cmp.sidebar);
+		cmp.ymax = cmp.h-cmp.buffer*1.5;
+		cmp.ymin = cmp.buffer;
 	},
+	
+	
 
 	});
 
