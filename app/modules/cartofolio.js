@@ -193,16 +193,7 @@ function(app, Project, Controls) {
 		afterRender: function() {
 	 	var cmp = this;
 	 	
-	 	$(".container").css({
-		 	"width": "100%",
-		 	"height": "100%",
-		 	"top": 0,
-		 	"left": 0,
-		 	"visibility": "visible",
-		 	"display": "none"
-	 	});
 	 	
-	 	$(".container").fadeIn();
 	 	
 		if (cmp.firstRender) {
 
@@ -244,15 +235,31 @@ function(app, Project, Controls) {
 						cmp.arrange("random");
 				   }
 			}
+			
+			$(".container").css({
+			 	"width": "100%",
+			 	"height": "100%",
+			 	"top": 0,
+			 	"left": 0,
+			 	"visibility": "visible",
+			 	"display": "none"
+		 	});
+		 	
+		 	$(".container").fadeIn(600, "easeInOutQuad");
+		 	
 			cmp.firstRender = false;
 		}
 	},
 
 		/*  !cartofolio init	*/
-		initialize: function () {
+	initialize: function () {
 		_.bindAll(this);
 		var cmp = this;
-
+		d3.selection.prototype.moveToFront = function() {
+		  return this.each(function(){
+		  this.parentNode.appendChild(this);
+		  });
+		};
 	},
 
 
@@ -317,20 +324,23 @@ function(app, Project, Controls) {
 				.attr("class", "node")
 				.call(cmp.force.drag);
 
+		cmp.orb = cmp.node.append("g")
+			.attr("class","orb")
+			;
 
-		cmp.node.append("circle")
+		cmp.orb.append("circle")
 			.attr("class", "orbcircle")
 			.attr("r", cmp.r)
 			;
 
-		cmp.node.append("clipPath")
+		cmp.orb.append("clipPath")
 					.attr("id", function(d) { return d.get("slug"); })
 				.append("circle")
 					.attr("class", "orbclip")
 					.attr("r", cmp.r)
 					;
 
-		cmp.node.append("g")
+		cmp.orb.append("g")
 					.attr("class", "clip_group")
 					.attr("clip-rule", "nonzero")
 					.attr("id", function(d) { return d.get("slug") + "_to_clip"; })
@@ -344,31 +354,34 @@ function(app, Project, Controls) {
 					.attr("xlink:href", function (d) { return d.get("thumbnail"); })
 					;
 		
-		var label = cmp.node.append("g")
+		$("g.node").on("mouseenter", function () {
+			var label = d3.select(this).append("g")
 					.attr("class", "label")
 					.attr("id", function (d) { return d.get("slug"); })
 					;
 		
-		var ltext = label.append("text")
-					.text(function (d) { return d.get("title"); })
-					.attr("x", function ( d ) { return cmp.r + 10 })
-					.attr("y", function ( d ) {	return 0 })
-					.attr("dy", "0.3em")
-					;
+			var ltext = label.append("svg:text")
+						.attr("x", function ( d ) { return cmp.r + 20 })
+						.attr("y", function ( d ) {	return 0 })
+						.attr("dy", "0.3em")
+						.text(function (d) { return d.get("title"); })
+						;
+						
+			var bbox = ltext.node().getBBox();
+			
+			label.insert("rect", ":first-child")
+				.attr("x", bbox.x-10)
+				.attr("y", bbox.y-5)
+				.attr("width", bbox.width+20)
+				.attr("height", bbox.height+10)
+				;
+			d3.select(this).moveToFront();
+		});
 		
+		$("g.node").on("mouseleave", function () {
+			d3.selectAll(".label").remove();
+		});
 		
-		
-		console.log(ltext);
-		var tw = ltext.select().node().getComputedTextLength();
-		console.log(tw);
-		// !BROKEN
-		label.insert("rect", ".label text")
-					.attr("x", function ( d ) { return cmp.r + 10 })
-					.attr("y", function ( d ) {	return 0 })
-					.attr("width", function (d) {
-						 })
-					.attr("height", 20);
-
 	},
 
 		setup_d3: function () {

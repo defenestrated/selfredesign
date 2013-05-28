@@ -564,14 +564,24 @@ svg.projects {
 
 g.node {
 	position: absolute;
+	cursor: pointer;
 }
 
 g.node:hover circle.orbcircle {
 	fill: rgba(251,255,103,1);
 }
 
-g.node .label {
-	background: rgba(0,0,0,0.3);
+g.label {
+	position: absolute;
+	z-index: 1000;
+}
+
+g.label rect {
+	fill: rgba(0,0,0,0.8);
+}
+
+g.label text {
+	fill: rgba(251,255,103,1);
 }
 
 /* links */
@@ -582,20 +592,20 @@ g.link {
 
 ellipse.link {
 	fill: rgba(255,255,255,0);
-	transition: all .2s;
-	-moz-transition: all .2s;
-	-webkit-transition: all .2s;
-	-o-transition: all .2s;
+	transition: fill .2s;
+	-moz-transition: fill .2s;
+	-webkit-transition: fill .2s;
+	-o-transition: fill .2s;
 }
 
 circle.orbcircle {
 	fill: rgba(255,255,255,0.5);
 	stroke: black;
 	stroke-width: 2pt;
-	transition: all .5s;
-	-moz-transition: all .5s;
-	-webkit-transition: all .5s;
-	-o-transition: all .5s;
+	transition: fill .5s;
+	-moz-transition: fill .5s;
+	-webkit-transition: fill .5s;
+	-o-transition: fill .5s;
 }
 g.link:hover ellipse.link{
 	fill: red;
