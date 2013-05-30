@@ -13,6 +13,7 @@ function(app, Cartofolio, Project) {
 	app.sp = "";
 	app.sr = "";
 	app.si = "";
+	app.maptype = "random",
 	
 	_.extend(app.greenlight, Backbone.Events);
 	
@@ -234,11 +235,9 @@ function(app, Cartofolio, Project) {
 		"resumes": "resumes",
 		"debug": "debug",
 		"close": "close",
-/*
 		"projects/:proj": "single",
 		"projects/:proj/:request/:img": "single",
 		"projects/:proj/*psplat": "single",
-*/
 		"skeleton/:proj": "single",
 		"skeleton/:proj/:request/:img": "single",
 		"skeleton/:proj/*psplat": "single",

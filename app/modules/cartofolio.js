@@ -161,7 +161,6 @@ function(app, Project, Controls) {
 		sidebar: 300,
 		r: 10,
 		s: 0,
-		maptype: "random",
 		nodes: [],
 		force: '',
 		gravity: '',
@@ -219,7 +218,7 @@ function(app, Project, Controls) {
 						return model.get("title");
 					}));
 					cmp.d3_dom(function () {
-						cmp.arrange(cmp.maptype);
+						cmp.arrange(app.maptype);
 					});
 				});
 				
@@ -228,7 +227,7 @@ function(app, Project, Controls) {
 						return model.get("title");
 					}));
 					cmp.d3_dom(function () {
-						cmp.arrange(cmp.maptype);
+						cmp.arrange(app.maptype);
 					});
 				}
 	
@@ -242,7 +241,8 @@ function(app, Project, Controls) {
 				 	"top": 0,
 				 	"left": 0,
 				 	"visibility": "visible",
-				 	"display": "none"
+				 	"display": "none",
+				 	"overflow": "hidden"
 			 	});
 			 	
 			 	$(".container").fadeIn(600, "easeInOutQuad");
@@ -305,16 +305,37 @@ var sortbuttons = cmp.parchment.append("g")
 		$(".sidebar").append([
 			"<div class='homelogo'><a href='/'>sam galison</a></div>",
 			"<ul class='cartonav'></ul>",
-			"<table class='sorting'"
+			"<table class='carto'><tbody></tbody></table>"
 			]);
 		
 		$("ul.cartonav").append([
 			"<a	href='javascript:void(0)' onclick='projectselect()'><li id='projects'>projects</li></a>",
 			"<a	href='contact'>	<li id='contact'>	contact	</li></a>",
-			"<a	href='resumes'>	<li id='resumes'>	resumé	</li></a>"
+			"<a	href='resumes'>	<li id='resumes'>	resumé	</li></a>",
 		]);
 		
+		var pieces = [
+			["whether it's ongoing or completed", "active"	   		],
+			["when it was made and how many hours it took",	"date"		],
+			["what it's made of", "materials"					   		],
+			["how i made it", "techniques"						   		],
+			["how many dimensions it occupies",	"dimensions"	   		],
+			["how big it is", "scale"							   		],
+			["why i made it", "reasons"							   		],
+			["no logic at all", "random"						   		]
+		];
+
+		var wrapped = _(pieces).map(function (thing) {
+			return "<tr class='sortlink' id='" + thing[1] + "'><td>" + thing[0] + "</td></tr>";
+		});
+
+		wrapped.unshift("<tr><th>~ sort by: ~</th></tr>");
 		
+		$("table.carto tbody").append(wrapped);
+		
+		$("tr.sortlink").on("click", function (e) {
+			cmp.arrange(e);
+		});
 		
 		
 		// !force
@@ -454,16 +475,18 @@ var sortbuttons = cmp.parchment.append("g")
 	},
 
 	// !arrange fn's
-	test: function test() { console.log("testing"); },
 
 	arrange: function (e) {
 		var cmp = this;
 		var kind = '';
-
-		if ($(e.target).parent().attr("id") != undefined) { kind = $(e.target).parent().attr("id"); }
+		
+		if (typeof $(e.target).parent().attr("id") !== 'undefined') { kind = $(e.target).parent().attr("id"); }
 		else kind = e;
+		
+		app.maptype = kind;
 
 		console.log("arranging by " + kind);
+		if ($(".axislabel").length) $(".axislabel").fadeOut("600", "easeInOutQuad").remove();
 
 		cmp.setbuffer();
 
@@ -474,6 +497,35 @@ var sortbuttons = cmp.parchment.append("g")
 				d.r = cmp.r;
 			});
 		}
+		
+		else if (kind == "active") {
+/* 			console.log(Cartofolio.elders.models); */
+			Cartofolio.elders.models.forEach(function(d, i) {
+				if (d.get("is_active")) {
+					d.y0 = cmp.ymin;
+				}
+				else d.y0 = cmp.ymax;
+				d.r = cmp.r;
+			});
+			
+			
+			cmp.parchment.append("text")
+				.attr("class", "axislabel")
+				.attr("x", (cmp.xmax-cmp.xmin)/2)
+				.attr("y", cmp.ymin-cmp.buffer/2)
+				.attr("dy", "0")
+				.text("ongoing")
+				;
+			cmp.parchment.append("text")
+				.attr("class", "axislabel")
+				.attr("x", (cmp.xmax-cmp.xmin)/2)
+				.attr("y", cmp.ymax+cmp.buffer/2)
+				.attr("dy", "1em")
+				.text("completed")
+				;
+				
+			$(".axislabel").fadeIn("600", "easeInOutQuad");
+		}
 
 
 		cmp.force.resume();
@@ -482,7 +534,7 @@ var sortbuttons = cmp.parchment.append("g")
 	resize: function () {
 		var cmp = this;
 		console.log("resized!");
-		cmp.arrange(cmp.maptype);
+		cmp.arrange(app.maptype);
 	},
 
 
@@ -505,7 +557,7 @@ var sortbuttons = cmp.parchment.append("g")
 		cmp.s = 2*cmp.r/150;
 		cmp.xmin = cmp.buffer;
 		cmp.xmax = (cmp.w-cmp.buffer-cmp.sidebar);
-		cmp.ymax = cmp.h-cmp.buffer*1.5;
+		cmp.ymax = cmp.h-cmp.buffer;
 		cmp.ymin = cmp.buffer;
 	},
 	

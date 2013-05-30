@@ -204,7 +204,10 @@ class JSON_API_Post {
     $this->set_value('scale', $scale);
     $this->set_value('reasons', $reasons);
     
-    $this->set_value('is_active', get_post_meta($this->id, 'is_active', true));
+    $is_active = get_post_meta($this->id, 'is_active', true);
+    if ($is_active == "true") $is_active = true;
+    else $is_active = false;
+    $this->set_value('is_active', $is_active);
 	
   }
   
