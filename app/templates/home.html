@@ -1,9 +1,23 @@
 <div class="homelogo">sam galison</div>
 <div class="homenav">
 	<ul>
-		<li id="projects"><a href="skeleton">projects</a></li>
+		<li id="projects"><a href="javascript:void(0)" onclick="projectselect()">projects</a></li>
 		<li id="contact"><a href="contact">contact</a></li>
 		<li id="resumes"><a href="resumes">resumé</a></li>
 <!-- 		<li id="debug"><a href="debug">debug</a></li> -->
 	</ul>
 </div>
+
+<script type="text/javascript">
+
+	function projectselect() {
+		if ($("li#projects").length) {
+			$("li#projects").fadeOut(250, function () {
+				$(this).html("<a href='skeleton'>list view</a><span class='separator'>&nbsp;&nbsp;~&nbsp;&nbsp;</span><a href='cartofolio'>map view</a>");
+				($(".homenav").length || $(".cartonav").length) ? $(".separator").css("color", "rgb(0,0,0)") : $(".separator").css({"color": "rgb(175,175,175)", "word-spacing": "0"});
+				$(this).fadeIn(250);
+			});	
+		}
+	}
+	
+</script>

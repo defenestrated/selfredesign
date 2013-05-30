@@ -158,7 +158,7 @@ function(app, Project, Controls) {
 		lastX: 0,
 		lastY: 0,
 		firstRender: true,
-		sidebar: 100,
+		sidebar: 300,
 		r: 10,
 		s: 0,
 		maptype: "random",
@@ -185,85 +185,77 @@ function(app, Project, Controls) {
 
 		// !events
 		events: {
-			"click #sortbuttons" : "arrange"
+			"click .sortbutton" : "arrange"
 		},
 
 		sizefix: function () {},
 
+		
+		/*  !cartofolio init	*/
+		initialize: function () {
+			_.bindAll(this);
+			var cmp = this;
+			d3.selection.prototype.moveToFront = function() {
+			  return this.each(function(){
+			  this.parentNode.appendChild(this);
+			  });
+			};
+		},
+		
 		afterRender: function() {
-	 	var cmp = this;
-	 	
-	 	
-	 	
-		if (cmp.firstRender) {
-
-			cmp.w = $(window).width();
-			cmp.h = $(window).height();
-			cmp.s = 2*cmp.r/150;
-			cmp.format = d3.time.format("%Y-%m-%d %H:%M:%S");
-			cmp.setbuffer();
-			
-			Cartofolio.elders.on("greenlight", function () {
-				console.log("done with the elders");
-				console.log(_(Cartofolio.elders.models).map(function (model) {
-					return model.get("title");
-				}));
-				cmp.d3_dom();
-				cmp.setup_d3();
-			});
-			
-
-			Cartofolio.projects.bind("all", cmp.d3_update);
-
-			var rtime = new Date(1, 1, 2000, 12,00,00);
-			var timeout = false;
-			var delta = 200;
-			$(window).resize(function() {
-				   rtime = new Date();
-				   if (timeout === false) {
-						timeout = true;
-						setTimeout(resizeend, delta);
-				   }
-			});
-
-			function resizeend() {
-				   if (new Date() - rtime < delta) {
-						setTimeout(resizeend, delta);
-				   } else {
-						timeout = false;
-			/*			 console.log("window: " + $(window).width() + ", " + $(window).height()); */
-						cmp.arrange("random");
-				   }
+		 	var cmp = this;
+		 	
+			if (cmp.firstRender) {
+	
+				cmp.w = $(window).width();
+				cmp.h = $(window).height();
+				cmp.s = 2*cmp.r/150;
+				cmp.format = d3.time.format("%Y-%m-%d %H:%M:%S");
+				cmp.setbuffer();
+				
+				Cartofolio.elders.on("greenlight", function () {
+					console.log("done with the elders");
+					console.log(_(Cartofolio.elders.models).map(function (model) {
+						return model.get("title");
+					}));
+					cmp.d3_dom(function () {
+						cmp.arrange(cmp.maptype);
+					});
+				});
+				
+				if (Cartofolio.elders.length > 1) {
+					console.log(_(Cartofolio.elders.models).map(function (model) {
+						return model.get("title");
+					}));
+					cmp.d3_dom(function () {
+						cmp.arrange(cmp.maptype);
+					});
+				}
+	
+				Cartofolio.projects.bind("all", cmp.d3_update);
+	
+				
+				
+				$(".container").css({
+				 	"width": "100%",
+				 	"height": "100%",
+				 	"top": 0,
+				 	"left": 0,
+				 	"visibility": "visible",
+				 	"display": "none"
+			 	});
+			 	
+			 	$(".container").fadeIn(600, "easeInOutQuad");
+			 	
+				cmp.firstRender = false;
 			}
 			
-			$(".container").css({
-			 	"width": "100%",
-			 	"height": "100%",
-			 	"top": 0,
-			 	"left": 0,
-			 	"visibility": "visible",
-			 	"display": "none"
-		 	});
-		 	
-		 	$(".container").fadeIn(600, "easeInOutQuad");
-		 	
-			cmp.firstRender = false;
-		}
-	},
 
-		/*  !cartofolio init	*/
-	initialize: function () {
-		_.bindAll(this);
-		var cmp = this;
-		d3.selection.prototype.moveToFront = function() {
-		  return this.each(function(){
-		  this.parentNode.appendChild(this);
-		  });
-		};
-	},
+		},
 
 
-		d3_dom: function() {
+
+		d3_dom: function(callback) {
 		var cmp = this;
 
 		cmp.parchment = d3.select(".cf-wrapper").append("svg")
@@ -272,9 +264,10 @@ function(app, Project, Controls) {
 			.attr("height", "100%")
 			;
 
-		// !buttons
-
-		var sortbuttons = cmp.parchment.append("g")
+		// !---- buttons ----
+				
+		/*
+var sortbuttons = cmp.parchment.append("g")
 			.attr("id", "sortbuttons");
 
 		var Bscramble = sortbuttons.append("g")
@@ -296,6 +289,7 @@ function(app, Project, Controls) {
 				.attr("cy", cmp.parchment.selectAll("text.link")[0].length*40)
 				.attr("stroke", "black")
 				.attr("stroke-width", "2pt");
+*/
 
 		Cartofolio.elders.models.forEach(function(d, i) {
 			d.x = $(window).width()/2;
@@ -304,7 +298,25 @@ function(app, Project, Controls) {
 			d.y0 = $(window).height()/2;
 			d.r = cmp.r;
 		});
-
+		
+		$(".cf-wrapper").append('<div class=sidebar></div>');
+		$(".sidebar").css("width", cmp.sidebar + "px");
+		
+		$(".sidebar").append([
+			"<div class='homelogo'><a href='/'>sam galison</a></div>",
+			"<ul class='cartonav'></ul>",
+			"<table class='sorting'"
+			]);
+		
+		$("ul.cartonav").append([
+			"<a	href='javascript:void(0)' onclick='projectselect()'><li id='projects'>projects</li></a>",
+			"<a	href='contact'>	<li id='contact'>	contact	</li></a>",
+			"<a	href='resumes'>	<li id='resumes'>	resumé	</li></a>"
+		]);
+		
+		
+		
+		
 		// !force
 
 		cmp.force = d3.layout.force()
@@ -322,6 +334,7 @@ function(app, Project, Controls) {
 				.data(Cartofolio.elders.models)
 			.enter().append("g")
 				.attr("class", "node")
+				.attr("id", function (d) { return d.get("slug"); })
 				.call(cmp.force.drag);
 
 		cmp.orb = cmp.node.append("g")
@@ -376,35 +389,43 @@ function(app, Project, Controls) {
 				.attr("height", bbox.height+10)
 				;
 			d3.select(this).moveToFront();
+			$("g.label").fadeIn("fast");
 		});
 		
 		$("g.node").on("mouseleave", function () {
-			d3.selectAll(".label").remove();
+			$("g.label").fadeOut("fast", function () {
+				$(this).remove();
+			});
 		});
 		
+		$("g.node").on("click", function () {
+			d3.select(this).each(function (d) {
+				var somerouter = new Backbone.Router({});
+				somerouter.navigate('projects/' + d.get("slug"), {trigger:true});
+			});
+		});
+		
+		callback();
+		
+	},
+	
+	// !force fn's
+	tick: function(e) {
+	var cmp = this;
+	 cmp.node.each(cmp.gravity(e.alpha * 0.7))
+		 .each(cmp.collide(0.5))
+		 .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+		 ;
 	},
 
-		setup_d3: function () {
-
-	}, // end d3_setup
-
-		// !force fn's
-		tick: function(e) {
-		var cmp = this;
-		 cmp.node.each(cmp.gravity(e.alpha * 0.7))
-			 .each(cmp.collide(0.5))
-			 .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-			 ;
+	gravity: function(k) {
+	 return function(d) {
+		 d.x += (d.x0 - d.x) * k;
+		 d.y += (d.y0 - d.y) * k;
+	 };
 	},
 
-		gravity: function(k) {
-		 return function(d) {
-			 d.x += (d.x0 - d.x) * k;
-			 d.y += (d.y0 - d.y) * k;
-		 };
-	},
-
-		collide: function(k) {
+	collide: function(k) {
 		var cmp = this;
 		var q = d3.geom.quadtree(Cartofolio.elders.models);
 		 return function(node) {
@@ -432,36 +453,40 @@ function(app, Project, Controls) {
 		 };
 	},
 
-		// !arrange fn's
-		test: function test() { console.log("testing"); },
+	// !arrange fn's
+	test: function test() { console.log("testing"); },
 
-		arrange: function (e) {
-			var cmp = this;
-			var kind = '';
-	
-			if ($(e.target).parent().attr("id") != undefined) { kind = $(e.target).parent().attr("id"); }
-			else kind = e;
-	
-			console.log("arranging by " + kind);
-	
-			cmp.setbuffer();
-	
-			if (kind == "random") {
-				Cartofolio.elders.models.forEach(function(d, i) {
-					d.x0 = Math.random()*(cmp.xmax-cmp.xmin) + cmp.xmin+1;
-					d.y0 = Math.random()*(cmp.ymax-cmp.ymin) + cmp.ymin+1;
-					d.r = cmp.r;
-				});
+	arrange: function (e) {
+		var cmp = this;
+		var kind = '';
+
+		if ($(e.target).parent().attr("id") != undefined) { kind = $(e.target).parent().attr("id"); }
+		else kind = e;
+
+		console.log("arranging by " + kind);
+
+		cmp.setbuffer();
+
+		if (kind == "random") {
+			Cartofolio.elders.models.forEach(function(d, i) {
+				d.x0 = Math.random()*(cmp.xmax-cmp.xmin) + cmp.xmin+1;
+				d.y0 = Math.random()*(cmp.ymax-cmp.ymin) + cmp.ymin+1;
+				d.r = cmp.r;
+			});
 		}
 
 
 		cmp.force.resume();
 	},
+	
+	resize: function () {
+		var cmp = this;
+		console.log("resized!");
+		cmp.arrange(cmp.maptype);
+	},
 
-			/* -------------------------------------------------- */
 
-
-		setbuffer: function() {
+	setbuffer: function() {
 		var cmp = this;
 
 		cmp.w = $(window).width();

@@ -185,15 +185,23 @@ a.logo {
 	text-align: center;
 }
 
-.home a { 
+.home a, .home p { 
 	color: black; 
 	text-decoration: none;
 	font: normal normal 16px/1.2em "Futura", "Lucida Console", monospace;
-	word-spacing: -0.3em;
+	word-spacing: -0.1em;
 	letter-spacing: 0.12em;
 }
-.home a:hover { color: rgb(251,255,103) }
-.home a:active { color: red }
+
+.home p {
+	-webkit-margin-before: 0px;
+	-webkit-margin-after: 0px;
+	-webkit-margin-start: 0px;
+	-webkit-margin-end: 0px;
+	margin-bottom: 0px;
+}
+.home a:hover, .home p:hover { color: rgb(251,255,103) }
+.home a:active, .home p:active { color: red }
 
 .home ul {
 	/* kill native css */
@@ -210,6 +218,10 @@ a.logo {
 .home li {
 	list-style: none;
 	padding: 10px 0;
+}
+
+.home li#projects {
+	cursor: pointer;
 }
 
 .homelogo {
@@ -535,9 +547,6 @@ td.curr p {
 
 /* !-------------   carto   --------------- */
 
-
-
-/* !-------------   svg   --------------- */
 .cf-wrapper {
 	position: absolute;
 	top: 0;
@@ -545,6 +554,56 @@ td.curr p {
 	width: 100%;
 	height: 100%;
 }
+
+.cf-wrapper .sidebar {
+	position: absolute;
+	top: 0;
+	right: 0;
+	height: 100%;
+	text-align: center;
+	border-left: 1px solid black;
+}
+
+.cf-wrapper .sidebar .homelogo {
+	font-size: 24px;
+	padding-top: 3em;
+	padding-bottom: 0.5em;
+}
+
+.cf-wrapper .sidebar .homelogo a:hover {
+	color: rgb(175,175,175);
+}
+
+ul.cartonav {
+	list-style-type: none;
+	-webkit-margin-before: 0px;
+	-webkit-margin-after: 0px;
+	-webkit-margin-start: 0px;
+	-webkit-margin-end: 0px;
+	-webkit-padding-start: 0px;
+}
+
+ul.cartonav li {
+	padding: 0.5em 0;
+	font-size: 14px;
+}
+
+ul.cartonav li:hover {
+	background: rgba(0,0,0,0.5);
+}
+
+ul.cartonav a {
+	color: black; 
+	text-decoration: none;
+	font: normal normal 14px/1.2em "Futura", "Lucida Console", monospace;
+	word-spacing: -0.1em;
+	letter-spacing: 0.12em;
+}
+
+ul.cartonav a:hover { color: rgb(251,255,103) }
+
+/* !-------------   svg   --------------- */
+
 
 .content {
 	position: absolute;
@@ -574,6 +633,7 @@ g.node:hover circle.orbcircle {
 g.label {
 	position: absolute;
 	z-index: 1000;
+	display: none;
 }
 
 g.label rect {

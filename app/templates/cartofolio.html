@@ -1,1 +1,15 @@
 <div class="cf-wrapper"></div>
+
+<script type="text/javascript">
+
+	function projectselect() {
+		if ($("li#projects").length) {
+			$("li#projects").fadeOut(250, function () {
+				$(this).html("<a href='skeleton'>list view</a><span class='separator'>&nbsp;&nbsp;~&nbsp;&nbsp;</span><a href='cartofolio'>map view</a>");
+				($(".homenav").length || $(".cartonav").length) ? $(".separator").css("color", "rgb(0,0,0)") : $(".separator").css({"color": "rgb(175,175,175)", "word-spacing": "0"});
+				$(this).fadeIn(250);
+			});	
+		}
+	}
+	
+</script>

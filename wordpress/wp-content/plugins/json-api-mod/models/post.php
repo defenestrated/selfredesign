@@ -37,6 +37,9 @@ class JSON_API_Post {
   var $scale;
   var $reasons;
   
+  // meta:
+  var $is_active;
+  
   function JSON_API_Post($wp_post = null) {
     if (!empty($wp_post)) {
       $this->import_wp_object($wp_post);
@@ -200,6 +203,8 @@ class JSON_API_Post {
     $this->set_value('dimensions', $dimensions);
     $this->set_value('scale', $scale);
     $this->set_value('reasons', $reasons);
+    
+    $this->set_value('is_active', get_post_meta($this->id, 'is_active', true));
 	
   }
   

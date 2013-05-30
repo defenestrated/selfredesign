@@ -133,9 +133,6 @@ function(app, Cartofolio, Project) {
 				Cartofolio.extractElders();
 			});
 			
-			
-			
-			
 			app.layouts.nav = new pageView({
 				template: "nav",
 				className: "nav",
@@ -175,7 +172,8 @@ function(app, Cartofolio, Project) {
 			app.layouts.home = new pageView({
 				template: "home",
 				className: "home",
-				afterRender: function () {					
+				afterRender: function () {
+				
 					$(".container").css({
 						"visibility": "hidden",
 						"width": "auto",
@@ -230,24 +228,25 @@ function(app, Cartofolio, Project) {
 		
 	/* !routes */
 	routes: {
-		"carto": "carto",
+		"cartofolio": "cartofolio",
 		"skeleton": "skeleton",
 		"contact": "contact",
 		"resumes": "resumes",
 		"debug": "debug",
 		"close": "close",
-		"projects": "skeleton",
+/*
 		"projects/:proj": "single",
 		"projects/:proj/:request/:img": "single",
 		"projects/:proj/*psplat": "single",
+*/
 		"skeleton/:proj": "single",
 		"skeleton/:proj/:request/:img": "single",
 		"skeleton/:proj/*psplat": "single",
 		"": "index",
 		"*splat": "splatter"
 	},
-
-	carto: function() {
+	
+	cartofolio: function() {
 /* 		console.log(":: carto route"); */
 		switchTo( app.layouts.carto );
 	},
@@ -319,7 +318,7 @@ function(app, Cartofolio, Project) {
 	
 	function switchTo( newlayout ) {
 		
-		console.log("== switching to " + newlayout.className + " ==");
+		console.log("== switching to " + newlayout.className + ". first render? " + newlayout.firstRender + " ==");
 		
 		app.currpage = newlayout;
 		
@@ -506,11 +505,22 @@ function(app, Cartofolio, Project) {
 		if (model.get("scale") == 1) return model.get("scale") + " cubic foot";
 		else return model.get("scale") + " cubic feet";
 	}
+	app.projectselect = function () {
+		console.log("project selection");
+		if ($("li#projects").length) {
+			$("li#projects").fadeOut(250, function () {
+				$(this).html("<a href='skeleton'>list view</a><span class='separator'>&nbsp;&nbsp;~&nbsp;&nbsp;</span><a href='cartofolio'>map view</a>");
+				($(".homenav").length || $(".cartonav").length) ? $(".separator").css("color", "rgb(0,0,0)") : $(".separator").css({"color": "rgb(175,175,175)", "word-spacing": "0"});
+				$(this).fadeIn(250);
+			});	
+		}
+	}
 		
 /* 	!end resize fn */
 	app.resize = _.debounce(function() {
     	app.weightwatcher(true);
-    	(app.currpage.className == "single") ? app.callSingle(app.sp, app.sr, app.si) : switchTo( app.currpage );
+    	if (app.currpage.className == "cartofolio") app.layouts.carto.resize();
+    	else (app.currpage.className == "single") ? app.callSingle(app.sp, app.sr, app.si) : switchTo( app.currpage );
 	}, 500);
 
   return app.mainrouter;
