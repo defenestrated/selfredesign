@@ -220,10 +220,12 @@ function(app, Project, Controls) {
 				cmp.setbuffer();
 				
 				Cartofolio.elders.on("greenlight", function () {
+/*
 					console.log("done with the elders");
 					console.log(_(Cartofolio.elders.models).map(function (model) {
 						return model.get("title");
 					}));
+*/
 					cmp.d3_dom(function () {
 						cmp.arrange(app.maptype);
 					});
@@ -300,7 +302,7 @@ function(app, Project, Controls) {
 			]);
 		
 		$("ul.cartonav").append([
-			"<a	href='javascript:void(0)' onclick='projectselect()'><li id='projects'>projects</li></a>",
+			"<a	href='skeleton'><li id='skeleton'>	see projects in a list </li></a>",
 			"<a	href='contact'>	<li id='contact'>	contact	</li></a>",
 			"<a	href='resumes'>	<li id='resumes'>	resumé	</li></a>",
 		]);
@@ -523,7 +525,7 @@ function(app, Project, Controls) {
 		}
 		if ( $(window).width() != cmp.prevW && $(window).height() != cmp.prevH ) resize = false;
 		
-		$(".axes").fadeOut("600", "easeInOutQuad").remove();
+		
 		
 		cmp.setbuffer();
 		
@@ -563,37 +565,10 @@ function(app, Project, Controls) {
 				else d.y0 = cmp.ymax;
 				d.r = cmp.r;
 			});
-			
-			
-			var axes = cmp.parchment.append("g")
-				.attr("class","axes")
-				;
-			axes.append("text")
-				.attr("class", "axislabel")
-				.attr("x", (cmp.xmax-cmp.xmin)/2+cmp.buffer)
-				.attr("y", cmp.ymin-cmp.buffer/2)
-				.attr("dy", "0")
-				.text("ongoing")
-				;
-			axes.append("text")
-				.attr("class", "axislabel")
-				.attr("x", (cmp.xmax-cmp.xmin)/2+cmp.buffer)
-				.attr("y", cmp.ymax+cmp.buffer/2)
-				.attr("dy", "1em")
-				.text("completed")
-				;
-				
-			axes.append("line")
-				.attr("x1",cmp.xmin)
-				.attr("x2",cmp.xmax)
-				.attr("y1",(cmp.ymax-cmp.ymin)/2+cmp.buffer)
-				.attr("y2",(cmp.ymax-cmp.ymin)/2+cmp.buffer)
-				;
 		}
 		
 /* 		!:::: date :::: */
-
-		else if (kind = "date") {
+		else if (kind == "date") {
 			var format = d3.time.format("%Y-%m-%d %H:%M:%S");
 			cmp.formatDate = function(d) { return format.parse( d ); }
 			
@@ -615,85 +590,122 @@ function(app, Project, Controls) {
 				d.y0 = cmp.ydate(hours[i]);
 			});
 			
-			var axes = cmp.parchment.append("g")
-				.attr("class","axes")
-				;
+			
 			
 		}
 
 /* 		!:::: materials :::: */
-
-		else if (kind = "materials") {}
+		else if (kind == "materials") {
+			var allmaterials = _(Cartofolio.elders.models).map(function (d) {
+				return d.get("materials");
+			});
+			allmaterials = _(allmaterials).flatten();
+			console.log("all materials: " + allmaterials.length + " total, divvied by four = " + Math.floor(allmaterials.length/4) + " with " + allmaterials.length%4 + " left over");
+			console.log(allmaterials);
+		}
 
 /* 		!:::: techniques :::: */
-
-		else if (kind = "techniques") {}
+		else if (kind == "techniques") {}
 
 /* 		!:::: dimensions :::: */
-
-		else if (kind = "dimensions") {}
+		else if (kind == "dimensions") {}
 
 /* 		!:::: scale :::: */
-
-		else if (kind = "scale") {}
+		else if (kind == "scale") {}
 
 /* 		!:::: reasons :::: */
-
-		else if (kind = "reasons") {}
+		else if (kind == "reasons") {}
 		
 		cmp.drawaxes(kind);
 		cmp.drawleaders(kind);
-		
-		$(".axes").fadeIn("600", "easeInOutQuad");
-
 		cmp.force.resume();
 	},
 	
 	drawaxes: function (kind) {
 		var cmp = this;
 		
-		if (kind == "date") {
-			    
-			xAxis = d3.svg.axis().scale(cmp.xdate).orient("bottom");
-			yAxis = d3.svg.axis().scale(cmp.ydate).orient("left").ticks(3).tickFormat(function (d, i) {
-				if (i==0) return "a few";
-				else return d;
-			});
-			/*
-yAxis = d3.svg.axis().scale(cmp.ydate).orient("left").tickValues([mintick,midtick,maxtick]).tickFormat(function(d, i){
-			    
-			    else return Math.round(d/10)*10;
-			});
-*/
-			
-			var axes = d3.select("g.axes");
-			
-			if ( $("g.x-axis").length == 0 ) {
-				axes.append("g")
-						.attr("class", "x-axis")
-						.attr("transform", "translate(0," + (cmp.ymax+cmp.r*2) + ")")
-						.call(xAxis)
-						;
-				axes.append("text")
-					    .attr("class", "x-label")
-					    .attr("text-anchor", "middle")
-					    .attr("transform", "translate(" + ((cmp.xmax-cmp.xmin)/2 + cmp.buffer) + "," + (cmp.ymax + cmp.buffer*3/4) + ")")
-					    .text("when it got finished");
-			}
+		var axes;
 		
-			if ( $("g.y-axis").length == 0 ) {
-				axes.append("g")
-						.attr("class", "y-axis")
-						.attr("transform", "translate(" + (cmp.buffer) + ",0)")
-						.call(yAxis)			
-						;
+		if ($(".axes").length) $(".axes").fadeOut(300, "easeInOutQuad", function () {
+			this.remove();
+			axisappend();
+			$(".axes").fadeIn(300, "easeInOutQuad");
+		});
+		
+		else {
+			axisappend();
+			$(".axes").fadeIn(300, "easeInOutQuad");
+		}
+		
+		function axisappend() {
+			if (kind != "random") {
+				axes = cmp.parchment.append("g")
+					.attr("class","axes")
+					;
+			}
+			
+			if (kind == "date") {
+				    
+				xAxis = d3.svg.axis().scale(cmp.xdate).orient("bottom");
+				yAxis = d3.svg.axis().scale(cmp.ydate).orient("left").ticks(3).tickFormat(function (d, i) {
+					if (i==0) return "a few";
+					else return d;
+				});
+				
+				var axes = d3.select("g.axes");
+				
+				if ( $("g.x-axis").length == 0 ) {
+					axes.append("g")
+							.attr("class", "x-axis")
+							.attr("transform", "translate(0," + (cmp.ymax+cmp.r*2) + ")")
+							.call(xAxis)
+							;
+					axes.append("text")
+						    .attr("class", "x-label")
+						    .attr("text-anchor", "middle")
+						    .attr("transform", "translate(" + ((cmp.xmax-cmp.xmin)/2 + cmp.buffer) + "," + (cmp.ymax + cmp.buffer*3/4) + ")")
+						    .text("when it got finished");
+				}
+			
+				if ( $("g.y-axis").length == 0 ) {
+					axes.append("g")
+							.attr("class", "y-axis")
+							.attr("transform", "translate(" + (cmp.buffer) + ",0)")
+							.call(yAxis)			
+							;
+					axes.append("text")
+						    .attr("class", "y-label")
+						    .attr("text-anchor", "middle")
+						    .attr("transform", "translate(" + (cmp.buffer/2) + "," + ((cmp.ymax-cmp.ymin)/2 + cmp.buffer) + "), rotate(-90)")
+						    .text("hours i spent working on it");
+				}
+			}
+			
+			else if (kind == "active") {
 				axes.append("text")
-					    .attr("class", "y-label")
-					    .attr("text-anchor", "middle")
-					    .attr("transform", "translate(" + (cmp.buffer/2) + "," + ((cmp.ymax-cmp.ymin)/2 + cmp.buffer) + "), rotate(-90)")
-					    .text("hours i spent working on it");
+					.attr("class", "axislabel")
+					.attr("x", (cmp.xmax-cmp.xmin)/2+cmp.buffer)
+					.attr("y", cmp.ymin-cmp.buffer/2)
+					.attr("dy", "0")
+					.text("ongoing")
+					;
+				axes.append("text")
+					.attr("class", "axislabel")
+					.attr("x", (cmp.xmax-cmp.xmin)/2+cmp.buffer)
+					.attr("y", cmp.ymax+cmp.buffer/2)
+					.attr("dy", "1em")
+					.text("completed")
+					;
+					
+				axes.append("line")
+					.attr("x1",cmp.xmin)
+					.attr("x2",cmp.xmax)
+					.attr("y1",(cmp.ymax-cmp.ymin)/2+cmp.buffer)
+					.attr("y2",(cmp.ymax-cmp.ymin)/2+cmp.buffer)
+					;
 			}
 		}
+		
 		
 	},
 	
