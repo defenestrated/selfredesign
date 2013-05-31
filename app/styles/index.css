@@ -582,6 +582,9 @@ ul.cartonav {
 	-webkit-margin-end: 0px;
 	-webkit-padding-start: 0px;
 	padding-bottom: 75px;
+}
+
+.sidetop {
 	border-bottom: 1px solid black;
 }
 
@@ -701,6 +704,15 @@ g.link:hover ellipse.link{
 	display: none;
 }
 
+.axes line {
+	stroke: black;
+	shape-rendering: crispEdges;
+}
+
 .axislabel {
 	text-anchor: middle;
+}
+
+rect.boundingbox {
+	display: none;
 }

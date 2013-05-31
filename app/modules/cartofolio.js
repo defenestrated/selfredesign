@@ -154,9 +154,11 @@ function(app, Project, Controls) {
 		parchment: {},
 		prevW: $(window).width(),
 		prevH: $(window).height(),
+		xscale: '',
+		yscale: '',
 		w: '',
 		h: '',
-		x: '', y: '', ux: '', uy: '', xmin: '', ymin: '', xmax: '', ymax: '', axes: '', leader: '',
+		x: '', y: '', ux: '', uy: '', pxmin: '', xmin: '', pymin: '', ymin: '', pxmax: '', xmax: '', pymax: '', ymax: '', axes: '', leader: '',
 		lastX: 0,
 		lastY: 0,
 		firstRender: true,
@@ -253,6 +255,19 @@ function(app, Project, Controls) {
 			 	
 				cmp.firstRender = false;
 			}
+	
+			cmp.w = $(window).width();
+			cmp.h = $(window).height();
+			if (cmp.w >= cmp.h) {
+				cmp.buffer = cmp.h/5;
+			}
+			else {
+				cmp.buffer = cmp.w/5;
+			}
+			cmp.pxmin = cmp.buffer;
+			cmp.pxmax = (cmp.w-cmp.buffer-cmp.sidebar);
+			cmp.pymax = cmp.h-cmp.buffer;
+			cmp.pymin = cmp.buffer;
 			
 
 		},
@@ -274,8 +289,7 @@ function(app, Project, Controls) {
 		$(".sidebar").css("width", cmp.sidebar + "px");
 		
 		$(".sidebar").append([
-			"<div class='homelogo'><a href='/'>sam galison</a></div>",
-			"<ul class='cartonav'></ul>",
+			"<div class='sidetop'><div class='homelogo'><a href='/'>sam galison</a></div><ul class='cartonav'></ul></div>",
 			"<table class='carto'><tbody></tbody></table>"
 			]);
 		
@@ -286,7 +300,7 @@ function(app, Project, Controls) {
 		]);
 		
 		var pieces = [
-			["whether it's ongoing or completed", "active"	   		],
+			["whether it's ongoing or completed", "active"	   			],
 			["when it was made and how many hours it took",	"date"		],
 			["what it's made of", "materials"					   		],
 			["how i made it", "techniques"						   		],
@@ -305,7 +319,7 @@ function(app, Project, Controls) {
 		$("table.carto tbody").append(wrapped);
 		
 		$("table.carto").css({
-			"height": $(window).height()-($(".homelogo").outerHeight() + $("ul.cartonav").outerHeight())
+			"height": $(window).height()-$(".sidetop").height()
 		});
 		
 		$("tr.sortlink").on("click", function (e) {
@@ -313,6 +327,7 @@ function(app, Project, Controls) {
 		});
 		
 		cmp.parchment.append("rect")
+			.attr("class", "boundingbox")
 			.attr("x",cmp.xmin)
 			.attr("y",cmp.ymin)
 			.attr("width",cmp.xmax-cmp.xmin)
@@ -471,14 +486,25 @@ function(app, Project, Controls) {
 		
 		var resize = false;
 		
+		cmp.w = cmp.prevW;
+		cmp.h = cmp.prevH;
+		if (cmp.w >= cmp.h) {
+			cmp.buffer = cmp.h/5;
+		}
+		else {
+			cmp.buffer = cmp.w/5;
+		}
+		cmp.pxmin = cmp.buffer;
+		cmp.pxmax = (cmp.w-cmp.buffer-cmp.sidebar);
+		cmp.pymax = cmp.h-cmp.buffer;
+		cmp.pymin = cmp.buffer;
+		
 		if ($(window).width() != cmp.prevW) {
 			resize = true;
-			xscale = cmp.prevW / $(window).width();
 			cmp.prevW = $(window).width();
 		}
 		if ($(window).height() != cmp.prevH) {
 			resize = true;
-			yscale = cmp.prevH / $(window).height();
 			cmp.prevH = $(window).height();
 		}
 		
@@ -489,51 +515,71 @@ function(app, Project, Controls) {
 		
 		cmp.setbuffer();
 		
-		if (resize) {
+		cmp.xscale = d3.scale.linear()
+						.domain([cmp.pxmin, cmp.pxmax])
+						.range ([cmp.xmin ,  cmp.xmax]);
+		cmp.yscale = d3.scale.linear()
+						.domain([cmp.pymin, cmp.pymax])
+						.range ([cmp.ymin ,  cmp.ymax]);
+		
+		if (resize) { // for resizing the map
+			$("table.carto").css({
+				"height": $(window).height()-$(".sidetop").height()
+			});
 			
-		}
-		else {
-			if (kind == "random") {
-				Cartofolio.elders.models.forEach(function(d, i) {
-					d.x0 = Math.random()*(cmp.xmax-cmp.xmin) + cmp.xmin+1;
-					d.y0 = Math.random()*(cmp.ymax-cmp.ymin) + cmp.ymin+1;
-					d.r = cmp.r;
-				});
-			}
-			
-			else if (kind == "active") {
-				Cartofolio.elders.models.forEach(function(d, i) {				
-					if (d.get("is_active")) {
-						d.y0 = cmp.ymin;
-					}
-					else d.y0 = cmp.ymax;
-					d.r = cmp.r;
-				});
+			Cartofolio.elders.models.forEach(function(d) {
+				// scale x0 + y0
 				
-				
-				var axes = cmp.parchment.append("g")
-					.attr("class","axes")
-					;
-				axes.append("text")
-					.attr("class", "axislabel")
-					.attr("x", (cmp.xmax-cmp.xmin)/2+cmp.buffer)
-					.attr("y", cmp.ymin-cmp.buffer/2)
-					.attr("dy", "0")
-					.text("ongoing")
-					;
-				axes.append("text")
-					.attr("class", "axislabel")
-					.attr("x", (cmp.xmax-cmp.xmin)/2+cmp.buffer)
-					.attr("y", cmp.ymax+cmp.buffer/2)
-					.attr("dy", "1em")
-					.text("completed")
-					;
-					
-				$(".axes").fadeIn("600", "easeInOutQuad");
-			}
+				d.x0 = cmp.xscale(d.x0);
+				d.y0 = cmp.yscale(d.y0);
+			});
 		}
 		
-
+		if (kind == "random") {
+			Cartofolio.elders.models.forEach(function(d, i) {
+				d.x0 = Math.random()*(cmp.xmax-cmp.xmin) + cmp.xmin+1;
+				d.y0 = Math.random()*(cmp.ymax-cmp.ymin) + cmp.ymin+1;
+				d.r = cmp.r;
+			});
+		}
+		
+		else if (kind == "active") {
+			Cartofolio.elders.models.forEach(function(d, i) {				
+				if (d.get("is_active")) {
+					d.y0 = cmp.ymin;
+				}
+				else d.y0 = cmp.ymax;
+				d.r = cmp.r;
+			});
+			
+			
+			var axes = cmp.parchment.append("g")
+				.attr("class","axes")
+				;
+			axes.append("text")
+				.attr("class", "axislabel")
+				.attr("x", (cmp.xmax-cmp.xmin)/2+cmp.buffer)
+				.attr("y", cmp.ymin-cmp.buffer/2)
+				.attr("dy", "0")
+				.text("ongoing")
+				;
+			axes.append("text")
+				.attr("class", "axislabel")
+				.attr("x", (cmp.xmax-cmp.xmin)/2+cmp.buffer)
+				.attr("y", cmp.ymax+cmp.buffer/2)
+				.attr("dy", "1em")
+				.text("completed")
+				;
+				
+			axes.append("line")
+				.attr("x1",cmp.xmin)
+				.attr("x2",cmp.xmax)
+				.attr("y1",(cmp.ymax-cmp.ymin)/2+cmp.buffer)
+				.attr("y2",(cmp.ymax-cmp.ymin)/2+cmp.buffer)
+				;
+		}
+		
+		$(".axes").fadeIn("600", "easeInOutQuad");
 
 		cmp.force.resume();
 	},
@@ -566,6 +612,13 @@ function(app, Project, Controls) {
 		cmp.xmax = (cmp.w-cmp.buffer-cmp.sidebar);
 		cmp.ymax = cmp.h-cmp.buffer;
 		cmp.ymin = cmp.buffer;
+		
+		d3.select("rect.boundingbox")
+			.attr("x",cmp.xmin)
+			.attr("y",cmp.ymin)
+			.attr("width", cmp.xmax-cmp.xmin)
+			.attr("height",cmp.ymax-cmp.ymin)
+			;
 	},
 	
 	
