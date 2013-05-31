@@ -152,6 +152,8 @@ function(app, Project, Controls) {
 
 		projectgroup: {},
 		parchment: {},
+		prevW: $(window).width(),
+		prevH: $(window).height(),
 		w: '',
 		h: '',
 		x: '', y: '', ux: '', uy: '', xmin: '', ymin: '', xmax: '', ymax: '', axes: '', leader: '',
@@ -203,6 +205,8 @@ function(app, Project, Controls) {
 		
 		afterRender: function() {
 		 	var cmp = this;
+		 	
+		 	
 		 	
 			if (cmp.firstRender) {
 	
@@ -265,39 +269,6 @@ function(app, Project, Controls) {
 			;
 
 		// !---- buttons ----
-				
-		/*
-var sortbuttons = cmp.parchment.append("g")
-			.attr("id", "sortbuttons");
-
-		var Bscramble = sortbuttons.append("g")
-				.attr("class", "link")
-				.attr("id", "random")
-				;
-
-		Bscramble.append("text") // button text
-				.attr("class", "link")
-				.text("scramble")
-				.attr("x", cmp.w-cmp.sidebar)
-				.attr("y", cmp.parchment.selectAll("text.link")[0].length*40);
-
-		Bscramble.insert("ellipse", "text") //background circle
-				.attr("class", "link")
-				.attr("rx", function () { return Bscramble.select("text")[0][0].clientWidth*3/4; })
-				.attr("ry", 20)
-				.attr("cx", cmp.w-cmp.sidebar)
-				.attr("cy", cmp.parchment.selectAll("text.link")[0].length*40)
-				.attr("stroke", "black")
-				.attr("stroke-width", "2pt");
-*/
-
-		Cartofolio.elders.models.forEach(function(d, i) {
-			d.x = $(window).width()/2;
-			d.y = $(window).height()/2;
-			d.x0 = $(window).width()/2;
-			d.y0 = $(window).height()/2;
-			d.r = cmp.r;
-		});
 		
 		$(".cf-wrapper").append('<div class=sidebar></div>');
 		$(".sidebar").css("width", cmp.sidebar + "px");
@@ -333,10 +304,22 @@ var sortbuttons = cmp.parchment.append("g")
 		
 		$("table.carto tbody").append(wrapped);
 		
+		$("table.carto").css({
+			"height": $(window).height()-($(".homelogo").outerHeight() + $("ul.cartonav").outerHeight())
+		});
+		
 		$("tr.sortlink").on("click", function (e) {
 			cmp.arrange(e);
 		});
 		
+		cmp.parchment.append("rect")
+			.attr("x",cmp.xmin)
+			.attr("y",cmp.ymin)
+			.attr("width",cmp.xmax-cmp.xmin)
+			.attr("height",cmp.ymax-cmp.ymin)
+			.attr("fill","none")
+			.attr("stroke","black")
+			;
 		
 		// !force
 
@@ -484,48 +467,72 @@ var sortbuttons = cmp.parchment.append("g")
 		else kind = e;
 		
 		app.maptype = kind;
-
 		console.log("arranging by " + kind);
-		if ($(".axislabel").length) $(".axislabel").fadeOut("600", "easeInOutQuad").remove();
-
-		cmp.setbuffer();
-
-		if (kind == "random") {
-			Cartofolio.elders.models.forEach(function(d, i) {
-				d.x0 = Math.random()*(cmp.xmax-cmp.xmin) + cmp.xmin+1;
-				d.y0 = Math.random()*(cmp.ymax-cmp.ymin) + cmp.ymin+1;
-				d.r = cmp.r;
-			});
+		
+		var resize = false;
+		
+		if ($(window).width() != cmp.prevW) {
+			resize = true;
+			xscale = cmp.prevW / $(window).width();
+			cmp.prevW = $(window).width();
+		}
+		if ($(window).height() != cmp.prevH) {
+			resize = true;
+			yscale = cmp.prevH / $(window).height();
+			cmp.prevH = $(window).height();
 		}
 		
-		else if (kind == "active") {
-/* 			console.log(Cartofolio.elders.models); */
-			Cartofolio.elders.models.forEach(function(d, i) {
-				if (d.get("is_active")) {
-					d.y0 = cmp.ymin;
-				}
-				else d.y0 = cmp.ymax;
-				d.r = cmp.r;
-			});
+		if ( $(window).width() != cmp.prevW && $(window).height() != cmp.prevH ) resize = false;
+		console.log(resize);
+		
+		$(".axes").fadeOut("600", "easeInOutQuad").remove();
+		
+		cmp.setbuffer();
+		
+		if (resize) {
 			
-			
-			cmp.parchment.append("text")
-				.attr("class", "axislabel")
-				.attr("x", (cmp.xmax-cmp.xmin)/2)
-				.attr("y", cmp.ymin-cmp.buffer/2)
-				.attr("dy", "0")
-				.text("ongoing")
-				;
-			cmp.parchment.append("text")
-				.attr("class", "axislabel")
-				.attr("x", (cmp.xmax-cmp.xmin)/2)
-				.attr("y", cmp.ymax+cmp.buffer/2)
-				.attr("dy", "1em")
-				.text("completed")
-				;
-				
-			$(".axislabel").fadeIn("600", "easeInOutQuad");
 		}
+		else {
+			if (kind == "random") {
+				Cartofolio.elders.models.forEach(function(d, i) {
+					d.x0 = Math.random()*(cmp.xmax-cmp.xmin) + cmp.xmin+1;
+					d.y0 = Math.random()*(cmp.ymax-cmp.ymin) + cmp.ymin+1;
+					d.r = cmp.r;
+				});
+			}
+			
+			else if (kind == "active") {
+				Cartofolio.elders.models.forEach(function(d, i) {				
+					if (d.get("is_active")) {
+						d.y0 = cmp.ymin;
+					}
+					else d.y0 = cmp.ymax;
+					d.r = cmp.r;
+				});
+				
+				
+				var axes = cmp.parchment.append("g")
+					.attr("class","axes")
+					;
+				axes.append("text")
+					.attr("class", "axislabel")
+					.attr("x", (cmp.xmax-cmp.xmin)/2+cmp.buffer)
+					.attr("y", cmp.ymin-cmp.buffer/2)
+					.attr("dy", "0")
+					.text("ongoing")
+					;
+				axes.append("text")
+					.attr("class", "axislabel")
+					.attr("x", (cmp.xmax-cmp.xmin)/2+cmp.buffer)
+					.attr("y", cmp.ymax+cmp.buffer/2)
+					.attr("dy", "1em")
+					.text("completed")
+					;
+					
+				$(".axes").fadeIn("600", "easeInOutQuad");
+			}
+		}
+		
 
 
 		cmp.force.resume();

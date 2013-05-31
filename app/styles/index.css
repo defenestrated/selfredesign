@@ -608,6 +608,9 @@ ul.cartonav a {
 
 ul.cartonav a:hover { color: rgb(251,255,103) }
 
+table.carto {
+}
+
 table.carto td {
 	padding: 0 1em;
 }
@@ -625,7 +628,7 @@ tr.sortlink:hover {
 	color: rgb(251,255,103);
 }
 
-/* !-------------   svg   --------------- */
+/* !-------------   carto svg   --------------- */
 
 
 .content {
@@ -694,19 +697,10 @@ g.link:hover ellipse.link{
 	fill: red;
 }
 
-text.axislabel {
+.axes {
 	display: none;
 }
 
-
-
-/* !------------- controls -------------- */
-
-.controls {
-	position: absolute;
-	right: 0;
-	text-align: center;
-	width: 200px;
-	top: 0;
+.axislabel {
+	text-anchor: middle;
 }
-
