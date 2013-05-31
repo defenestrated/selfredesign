@@ -700,6 +700,8 @@ g.link:hover ellipse.link{
 	fill: red;
 }
 
+/* !- - - - axes - - - - */
+
 .axes {
 	display: none;
 }
@@ -716,3 +718,24 @@ g.link:hover ellipse.link{
 rect.boundingbox {
 	display: none;
 }
+
+.x-axis path,
+.x-axis line,
+.y-axis path,
+.y-axis line {
+    fill: none;
+    stroke: none;
+}
+
+/* !- - - - leaders - - - - */
+
+g.leaders {
+	display: none;
+}
+
+line.leader {
+	stroke: black;
+	stroke-width: 1pt;
+}
+
+
