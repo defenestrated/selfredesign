@@ -504,6 +504,32 @@ function(app, Project, Controls) {
 					
 				});
 			}
+			else if (app.maptype == "techniques") {
+				var relevanttechniques = [];
+				Cartofolio.elders.models.forEach(function(d, i) {
+					_(cmp.techlist).each(function (techcluster) {
+						_(techcluster.techniques).each(function (techObj) {
+							_(d.get("techniques")).each(function (nodeTech) {
+								if (nodeTech == techObj.name) relevanttechniques.push({"obj": techObj, "parentproject" : d.get("slug") } );
+							});
+						});
+					});
+				});
+				
+				
+				relevanttechniques.forEach(function (el, ix) {
+				
+					_(Cartofolio.elders.models).map(function ( ell ) {
+						if (ell.get("slug") == el.parentproject) {
+							d3.selectAll("line." + el.parentproject)
+									.attr("x2", ell.x)
+									.attr("y2", ell.y)
+						}
+					});
+				
+					
+				});
+			}
 		    
 	    }
 	},
@@ -667,20 +693,18 @@ function(app, Project, Controls) {
 
 /* 		!:::: materials :::: */
 		else if (kind == "materials") {
+			// get list of every item
 			var allmaterials = _(Cartofolio.elders.models).map(function (d) {
 				return d.get("materials");
 			});
+			
 			allmaterials = _.uniq(_(allmaterials).flatten());
 			
-			var total = allmaterials.length;
-			var portion = Math.floor(total/4);
-			var leftover = (total%4);
+			var total = allmaterials.length; // total number
+			var portion = Math.floor(total/4); // portion for each side
+			var leftover = (total%4); // leftover items
 			
-/*
-			console.log(allmaterials);
-			console.log("all materials: " + total + " total, divvied by four = " + portion + " with " + leftover + " left over");
-*/
-			
+			// mondo array
 			cmp.matlist = [
 				{"position": "top", 	"charlength": 0, "materials": []},
 				{"position": "right", 	"charlength": 0, "materials": []},
@@ -689,8 +713,9 @@ function(app, Project, Controls) {
 				{"position": "extra", 	"charlength": 0, "materials": []}
 			];
 			
-			var extras = [];
+			var extras = []; // intermediary, to store extras 
 			
+			// distribute items to portions
 			_(allmaterials).each(function (d,i) {
 				if (i < portion) 						cmp.matlist[0].materials.push({"name" : d, "xpos" : 0, "ypos" : 0});
 				if (i >= portion && i < portion*2) 		cmp.matlist[1].materials.push({"name" : d, "xpos" : 0, "ypos" : 0});
@@ -699,7 +724,7 @@ function(app, Project, Controls) {
 				if (i >= portion*4) 					cmp.matlist[4].materials.push({"name" : d, "xpos" : 0, "ypos" : 0});
 			});
 			
-
+			// count letters in mondo list + extra
 			_(cmp.matlist).each(function (d) {
 				_(d.materials).each(function (mat){
 					d.charlength += mat.name.replace(/[^ A-Z]/gi, "").length;
@@ -712,33 +737,26 @@ function(app, Project, Controls) {
 							"charlength": mat.name.replace(/[^ A-Z]/gi, "").length
 							});
 					});
-					
-					
 				}
 			});
 
 
-			
+			//sort mondo list + extras by character count
 			cmp.matlist = _(cmp.matlist).sortBy(function (d) { return d.charlength; });
 			extras = _(extras).sortBy(function (d) { return d.charlength*-1; });
 			
-/* 			console.log("--cmp.matlist--"); */
-			_(cmp.matlist).each(function (d) {
-/* 				console.log(d); */
-			});
-			
-/* 			console.log("--extras--"); */
+			//dish out extras to portions
 			_(extras).each(function (d, i) {
-/* 				console.log(d, i); */
 				cmp.matlist[i%4].materials.push(d.name);
 			});
 			
-			cmp.matlist.splice(4, 1);
-			
-/*
-			console.log("--new cmp.matlist--");
 			console.log(cmp.matlist);
-*/
+			// remove "extra" portion (which is now useless) from mondo list
+			cmp.matlist.forEach(function ( d, i ) {
+				if (d.position == "extra") cmp.matlist.splice(i, 1);
+			});
+			
+			// assign x + y positions to each item + count characters (just in case it's needed later - currently unused)
 			_(cmp.matlist).each(function (d) {
 				d.charlength = 0;
 				_(d.materials).each(function (mat, i){
@@ -768,6 +786,7 @@ function(app, Project, Controls) {
 				});
 			});
 			
+			// for each project, make a list of the items it should care about
 			Cartofolio.elders.models.forEach(function(d, i) {
 				var relevantmaterials = [];
 				_(cmp.matlist).each(function (matcluster) {
@@ -778,6 +797,7 @@ function(app, Project, Controls) {
 					});
 				});
 				
+				// calculate average x and y positions:
 				var xtot = 0;
 				_(relevantmaterials).each(function ( r ) {
 					xtot += r.xpos;
@@ -795,7 +815,126 @@ function(app, Project, Controls) {
 		}
 
 /* 		!:::: techniques :::: */
-		else if (kind == "techniques") {}
+		else if (kind == "techniques") {
+			// get list of every item
+			var alltech = _(Cartofolio.elders.models).map(function (d) {
+				return d.get("techniques");
+			});
+			
+			alltech = _.uniq(_(alltech).flatten());
+			
+			var total = alltech.length; // total number
+			var portion = Math.floor(total/4); // portion for each side
+			var leftover = (total%4); // leftover items
+			
+			// mondo array
+			cmp.techlist = [
+				{"position": "top", 	"charlength": 0, "techniques": []},
+				{"position": "right", 	"charlength": 0, "techniques": []},
+				{"position": "bottom", 	"charlength": 0, "techniques": []},
+				{"position": "left", 	"charlength": 0, "techniques": []},
+				{"position": "extra", 	"charlength": 0, "techniques": []}
+			];
+			
+			var extras = []; // intermediary, to store extras 
+			
+			// distribute items to portions
+			_(alltech).each(function (d,i) {
+				if (i < portion) 						cmp.techlist[0].techniques.push({"name" : d, "xpos" : 0, "ypos" : 0});
+				if (i >= portion && i < portion*2) 		cmp.techlist[1].techniques.push({"name" : d, "xpos" : 0, "ypos" : 0});
+				if (i >= portion*2 && i < portion*3) 	cmp.techlist[2].techniques.push({"name" : d, "xpos" : 0, "ypos" : 0});
+				if (i >= portion*3 && i < portion*4) 	cmp.techlist[3].techniques.push({"name" : d, "xpos" : 0, "ypos" : 0});
+				if (i >= portion*4) 					cmp.techlist[4].techniques.push({"name" : d, "xpos" : 0, "ypos" : 0});
+			});
+			
+			// count letters in mondo list + extra
+			_(cmp.techlist).each(function (d) {
+				_(d.techniques).each(function (tech){
+					d.charlength += tech.name.replace(/[^ A-Z]/gi, "").length;
+				});
+				
+				if (d.position == "extra") {
+					_(d.techniques).each(function (tech){
+						extras.push({
+							"name": tech,
+							"charlength": tech.name.replace(/[^ A-Z]/gi, "").length
+							});
+					});
+				}
+			});
+
+
+			//sort mondo list + extras by character count
+			cmp.techlist = _(cmp.techlist).sortBy(function (d) { return d.charlength; });
+			extras = _(extras).sortBy(function (d) { return d.charlength*-1; });
+			
+			//dish out extras to portions
+			_(extras).each(function (d, i) {
+				cmp.techlist[i%4].techniques.push(d.name);
+			});
+			
+			// remove "extra" portion (which is now useless) from mondo list
+			cmp.techlist.forEach(function ( d, i ) {
+				if (d.position == "extra") cmp.techlist.splice(i, 1);
+			});
+			
+			// assign x + y positions to each item + count characters (just in case it's needed later - currently unused)
+			_(cmp.techlist).each(function (d) {
+				d.charlength = 0;
+				_(d.techniques).each(function (tech, i){
+					d.charlength += tech.name.replace(/[^ A-Z]/gi, "").length;
+					
+					switch(d.position) {
+						case "top":
+							tech.xpos = (cmp.xmax-cmp.xmin)/d.techniques.length*(i+0.5) + cmp.xmin;
+							tech.ypos = cmp.ymin;
+							break;
+							
+						case "bottom":
+							tech.xpos = (cmp.xmax-cmp.xmin)/d.techniques.length*(i+0.5) + cmp.xmin;
+							tech.ypos = cmp.ymax;
+							break;
+							
+						case "left":
+							tech.xpos = cmp.xmin;
+							tech.ypos = (cmp.ymax-cmp.ymin)/d.techniques.length*(i+0.5) + cmp.ymin;
+							break;
+							
+						case "right":
+							tech.xpos = cmp.xmax;
+							tech.ypos = (cmp.ymax-cmp.ymin)/d.techniques.length*(i+0.5) + cmp.ymin;
+							break;
+					}
+				});
+			});
+			
+			console.log(cmp.techlist);
+			
+			// for each project, make a list of the items it should care about
+			Cartofolio.elders.models.forEach(function(d, i) {
+				var relevanttechniques = [];
+				_(cmp.techlist).each(function (techcluster) {
+					_(techcluster.techniques).each(function (techObj) {
+						_(d.get("techniques")).each(function (nodeTech) {
+							if (nodeTech == techObj.name) relevanttechniques.push(techObj);
+						});
+					});
+				});
+				
+				// calculate average x and y positions:
+				var xtot = 0;
+				_(relevanttechniques).each(function ( r ) {
+					xtot += r.xpos;
+				});
+				var ytot = 0;
+				_(relevanttechniques).each(function ( r ) {
+					ytot += r.ypos;
+				});
+				
+				d.x0 = xtot / relevanttechniques.length;
+				d.y0 = ytot / relevanttechniques.length;
+			});
+		}
 
 /* 		!:::: dimensions :::: */
 		else if (kind == "dimensions") {}
@@ -902,16 +1041,48 @@ function(app, Project, Controls) {
 									
 					switch(d.position) {
 						case "top":
-							thetext.attr("dy", "-.5em");
+							thetext.attr("dy", -cmp.r - 10);
 							break;
 						case "bottom":
-							thetext.attr("dy", "1.2em");
+							thetext.attr("dy", cmp.r + 10);
 							break;
 						case "left":
-							thetext.attr("class", "axislabel alignright");
+							thetext.attr("class", "axislabel alignright")
+								.attr("dx", -cmp.r - 10);
 							break;
 						case "right":
-							thetext.attr("class", "axislabel alignleft");
+							thetext.attr("class", "axislabel alignleft")
+								.attr("dx", cmp.r + 10);
+							break;
+					}
+					
+					});
+				});
+			}
+			
+			else if (kind == "techniques") {
+				_(cmp.techlist).each(function(d) {
+					_(d.techniques).each(function (tech, i){
+					var thetext = axes.append("text")
+									.attr("class", "axislabel")
+									.attr("x", tech.xpos)
+									.attr("y", tech.ypos)
+									.text(tech.name);
+									
+					switch(d.position) {
+						case "top":
+							thetext.attr("dy", -cmp.r - 10);
+							break;
+						case "bottom":
+							thetext.attr("dy", cmp.r + 10);
+							break;
+						case "left":
+							thetext.attr("class", "axislabel alignright")
+								.attr("dx", -cmp.r - 10);
+							break;
+						case "right":
+							thetext.attr("class", "axislabel alignleft")
+								.attr("dx", cmp.r + 10);
 							break;
 					}
 					
@@ -968,9 +1139,6 @@ function(app, Project, Controls) {
 					});
 				});
 				
-
-			
-			
 				if ( $("g.leaders").length == 0 ) {
 					cmp.matleader = cmp.parchment.insert("g", ":first-child")
 								.attr("class", "leaders");
@@ -980,6 +1148,43 @@ function(app, Project, Controls) {
 						_(Cartofolio.elders.models).map(function ( ell ) {
 							if (ell.get("slug") == el.parentproject) {
 								cmp.matleader.append("line")
+										.attr("z-index", -5)
+										.attr("class", "leader " + el.parentproject + " " + el.obj.name)
+										.attr("x1", el.obj.xpos)
+										.attr("y1", el.obj.ypos)
+										.attr("x2", ell.x)
+										.attr("y2", ell.y)
+										.call(cmp.force.drag);
+							}
+						});
+					
+						
+					});
+				}
+					
+				$("g.leaders").fadeIn(600, "easeInOutQuad");
+			}
+			else if (kind == "techniques") {
+				var relevanttechniques = [];
+				Cartofolio.elders.models.forEach(function(d, i) {
+					_(cmp.techlist).each(function (techcluster) {
+						_(techcluster.techniques).each(function (techObj) {
+							_(d.get("techniques")).each(function (nodeTech) {
+								if (nodeTech == techObj.name) relevanttechniques.push({"obj": techObj, "parentproject" : d.get("slug") } );
+							});
+						});
+					});
+				});
+				
+				if ( $("g.leaders").length == 0 ) {
+					cmp.techleader = cmp.parchment.insert("g", ":first-child")
+								.attr("class", "leaders");
+								
+					relevanttechniques.forEach(function (el, ix) {
+					
+						_(Cartofolio.elders.models).map(function ( ell ) {
+							if (ell.get("slug") == el.parentproject) {
+								cmp.techleader.append("line")
 										.attr("z-index", -5)
 										.attr("class", "leader " + el.parentproject + " " + el.obj.name)
 										.attr("x1", el.obj.xpos)

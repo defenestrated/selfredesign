@@ -726,7 +726,7 @@ g.link:hover ellipse.link{
 }
 
 rect.boundingbox {
-/* 	display: none; */
+	display: none;
 }
 
 .x-axis path,
