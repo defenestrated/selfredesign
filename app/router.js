@@ -230,6 +230,7 @@ function(app, Cartofolio, Project) {
 	/* !routes */
 	routes: {
 		"cartofolio": "cartofolio",
+		"cartofolio/:kind" : "cartofolio",
 		"skeleton": "skeleton",
 		"contact": "contact",
 		"resumes": "resumes",
@@ -245,8 +246,9 @@ function(app, Cartofolio, Project) {
 		"*splat": "splatter"
 	},
 	
-	cartofolio: function() {
+	cartofolio: function(kind) {
 /* 		console.log(":: carto route"); */
+		app.maptype = kind;
 		switchTo( app.layouts.carto );
 	},
 	skeleton: function() {

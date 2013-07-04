@@ -193,6 +193,13 @@ function(app, Project, Controls) {
 			$("table.carto").css({
 				"height": $(window).height()-$(".sidetop").height()
 			});
+			
+			$("table.carto").css({
+				"visibility": "visible",
+				"display": "none"
+			});
+			
+			$("table.carto").fadeIn(300, "easeInOutQuad");
 		},
 
 		
@@ -227,7 +234,9 @@ function(app, Project, Controls) {
 					}));
 */
 					cmp.d3_dom(function () {
-						cmp.arrange(app.maptype);
+						cmp.temptype = app.maptype;
+						cmp.arrange("random");
+						cmp.arrange(cmp.temptype);
 					});
 				});
 				
@@ -236,7 +245,9 @@ function(app, Project, Controls) {
 						return model.get("title");
 					}));
 					cmp.d3_dom(function () {
-						cmp.arrange(app.maptype);
+						cmp.temptype = app.maptype;
+						cmp.arrange("random");
+						cmp.arrange(cmp.temptype);
 					});
 				}
 	
@@ -327,6 +338,8 @@ function(app, Project, Controls) {
 		$("table.carto tbody").append(wrapped);
 		
 		$("tr.sortlink").on("click", function (e) {
+			var nr = new Backbone.Router({});
+			nr.navigate('cartofolio/' + e.currentTarget.id);
 			cmp.arrange(e);
 		});
 		
@@ -391,9 +404,11 @@ function(app, Project, Controls) {
 					;
 		
 		$("g.node").on("mouseenter", function () {
+			var which = "";
+			
 			var label = d3.select(this).append("g")
 					.attr("class", "label")
-					.attr("id", function (d) { return d.get("slug"); })
+					.attr("id", function (d) { which = d.get("slug"); return d.get("slug"); })
 					;
 		
 			var ltext = label.append("svg:text")
@@ -413,12 +428,25 @@ function(app, Project, Controls) {
 				;
 			d3.select(this).moveToFront();
 			$("g.label").fadeIn("fast");
+				
+			d3.selectAll("line.leader." + which)
+				.transition(300)
+				.style("stroke-width", "3px");
+			
 		});
 		
 		$("g.node").on("mouseleave", function () {
+			var which = "";
+			d3.select(this)
+				.attr("id",function (d) { which = d.get("slug"); })
+				;
+				
 			$("g.label").fadeOut("fast", function () {
 				$(this).remove();
 			});
+			d3.selectAll("line.leader." + which)
+				.transition(300)
+				.style("stroke-width", "1px");
 		});
 		
 		$("g.node").on("click", function () {
@@ -494,7 +522,10 @@ function(app, Project, Controls) {
 		var cmp = this;
 		var kind = '';
 		
-		if (typeof $(e.target).parent().attr("id") !== 'undefined') { kind = $(e.target).parent().attr("id"); }
+		if (typeof e !== "undefined") {
+			if (typeof $(e.target).parent().attr("id") !== 'undefined') { kind = $(e.target).parent().attr("id"); }
+			else kind = e;
+		}
 		else kind = e;
 		
 		app.maptype = kind;
@@ -540,6 +571,19 @@ function(app, Project, Controls) {
 			$("table.carto").css({
 				"height": $(window).height()-$(".sidetop").height()
 			});
+			
+			$("table.carto").css({
+				"visibility": "visible",
+				"display": "none"
+			});
+			
+			$("table.carto").fadeIn(300, "easeInOutQuad");
+			
+			d3.selectAll("g.node").selectAll("circle")
+					.attr("r",cmp.r);
+			
+			d3.selectAll("g.node").selectAll("image")
+					.attr("transform","scale(" + cmp.s + ")");
 			
 			Cartofolio.elders.models.forEach(function(d) {
 				d.x0 = cmp.xscale(d.x0);
@@ -599,9 +643,77 @@ function(app, Project, Controls) {
 			var allmaterials = _(Cartofolio.elders.models).map(function (d) {
 				return d.get("materials");
 			});
-			allmaterials = _(allmaterials).flatten();
-			console.log("all materials: " + allmaterials.length + " total, divvied by four = " + Math.floor(allmaterials.length/4) + " with " + allmaterials.length%4 + " left over");
+			allmaterials = _.uniq(_(allmaterials).flatten());
+			
+			var total = allmaterials.length;
+			var portion = Math.floor(total/4);
+			var leftover = (total%4);
+			
 			console.log(allmaterials);
+			console.log("all materials: " + total + " total, divvied by four = " + portion + " with " + leftover + " left over");
+			
+			var matlist = [
+				{"position": "top", 	"charlength": 0, "materials": []},
+				{"position": "right", 	"charlength": 0, "materials": []},
+				{"position": "bottom", 	"charlength": 0, "materials": []},
+				{"position": "left", 	"charlength": 0, "materials": []},
+				{"position": "extra", 	"charlength": 0, "materials": []}
+			];
+			
+			var extras = [];
+			
+			_(allmaterials).each(function (d,i) {
+				if (i < portion) 						matlist[0].materials.push(d);
+				if (i >= portion && i < portion*2) 		matlist[1].materials.push(d);
+				if (i >= portion*2 && i < portion*3) 	matlist[2].materials.push(d);
+				if (i >= portion*3 && i < portion*4) 	matlist[3].materials.push(d);
+				if (i >= portion*4) 					matlist[4].materials.push(d);
+			});
+			
+			_(matlist).each(function (d) {
+				_(d.materials).each(function (mat){
+					d.charlength += mat.replace(/[^ A-Z]/gi, "").length;
+				});
+				
+				if (d.position == "extra") {
+					_(d.materials).each(function (mat){
+						extras.push({
+							"name": mat,
+							"charlength": mat.replace(/[^ A-Z]/gi, "").length
+							});
+					});
+					
+					
+				}
+				console.log(d.charlength, d.materials);
+			});
+			
+			matlist = _(matlist).sortBy(function (d) { return d.charlength; });
+			extras = _(extras).sortBy(function (d) { return d.charlength*-1; });
+			
+/* 			console.log("--matlist--"); */
+			_(matlist).each(function (d) {
+				console.log(d);
+			});
+			
+/* 			console.log("--extras--"); */
+			_(extras).each(function (d, i) {
+				console.log(d, i);
+				matlist[i%4].materials.push(d.name);
+			});
+			
+/* 			console.log("--new matlist--"); */
+			_(matlist).each(function (d) {
+				d.charlength = 0;
+/* 				console.log("position: " + d.position); */
+				_(d.materials).each(function (mat){
+					d.charlength += mat.replace(/[^ A-Z]/gi, "").length;
+					console.log(mat);
+				});
+/* 				console.log("---"); */
+			});
+			
+			
 		}
 
 /* 		!:::: techniques :::: */
@@ -628,14 +740,10 @@ function(app, Project, Controls) {
 		
 		if ($(".axes").length) $(".axes").fadeOut(300, "easeInOutQuad", function () {
 			this.remove();
-			axisappend();
-			$(".axes").fadeIn(300, "easeInOutQuad");
+			axisappend();			
 		});
 		
-		else {
-			axisappend();
-			$(".axes").fadeIn(300, "easeInOutQuad");
-		}
+		else axisappend();
 		
 		function axisappend() {
 			if (kind != "random") {
@@ -661,7 +769,7 @@ function(app, Project, Controls) {
 							.call(xAxis)
 							;
 					axes.append("text")
-						    .attr("class", "x-label")
+						    .attr("class", "axislabel x-label")
 						    .attr("text-anchor", "middle")
 						    .attr("transform", "translate(" + ((cmp.xmax-cmp.xmin)/2 + cmp.buffer) + "," + (cmp.ymax + cmp.buffer*3/4) + ")")
 						    .text("when it got finished");
@@ -674,7 +782,7 @@ function(app, Project, Controls) {
 							.call(yAxis)			
 							;
 					axes.append("text")
-						    .attr("class", "y-label")
+						    .attr("class", "axislabel y-label")
 						    .attr("text-anchor", "middle")
 						    .attr("transform", "translate(" + (cmp.buffer/2) + "," + ((cmp.ymax-cmp.ymin)/2 + cmp.buffer) + "), rotate(-90)")
 						    .text("hours i spent working on it");
@@ -704,6 +812,8 @@ function(app, Project, Controls) {
 					.attr("y2",(cmp.ymax-cmp.ymin)/2+cmp.buffer)
 					;
 			}
+			
+			$(".axes").fadeIn(300, "easeInOutQuad");
 		}
 		
 		
@@ -711,30 +821,34 @@ function(app, Project, Controls) {
 	
 	drawleaders: function(kind) {
 		var cmp = this;
-	
-		if (kind == "random" || kind == "active") {
-			if ( $("g.leaders").length != 0 ) {
-				$("g.leaders").fadeOut(600, "easeInOutQuad").remove();
-			}
-		}
-		
-		else if (kind == "date") {
-			if ( $("g.leaders").length == 0 ) {
-				cmp.leader = cmp.parchment.insert("g", ":first-child")
-						.attr("class", "leaders")
-						.selectAll("line")
-					.data(Cartofolio.elders.models)
-				.enter().append("line")
-						.attr("z-index", -5)
-						.attr("class", "leader")
-						.attr("x1", 0)
-						.attr("y1", 0)
-						.attr("x2", function(d) { return d.x ; } )
-						.attr("y2", (cmp.ymax+cmp.r*2) )
-						.call(cmp.force.drag);
-				}
+		if ( $("g.leaders").length != 0 ) {
+			$("g.leaders").fadeOut(600, "easeInOutQuad", function () {
+				this.remove();
+				leaderappend();
 				
-				$("g.leaders").fadeIn(600, "easeInOutQuad");
+			});
+		}
+		else leaderappend();
+		
+		function leaderappend() {
+			if (kind == "date") {
+				if ( $("g.leaders").length == 0 ) {
+					cmp.leader = cmp.parchment.insert("g", ":first-child")
+							.attr("class", "leaders")
+							.selectAll("line")
+						.data(Cartofolio.elders.models)
+					.enter().append("line")
+							.attr("z-index", -5)
+							.attr("class", function (d) { return "leader " + d.get("slug"); })
+							.attr("x1", 0)
+							.attr("y1", 0)
+							.attr("x2", function(d) { return d.x ; } )
+							.attr("y2", (cmp.ymax+cmp.r*2) )
+							.call(cmp.force.drag);
+					}
+					
+					$("g.leaders").fadeIn(600, "easeInOutQuad");
+			}
 		}
 	},
 		
@@ -753,11 +867,11 @@ function(app, Project, Controls) {
 
 		if (cmp.w >= cmp.h) {
 			cmp.buffer = cmp.h/5;
-			cmp.r = Math.round(cmp.buffer/6);
+			cmp.r = Math.round(cmp.buffer/7);
 		}
 		else {
 			cmp.buffer = cmp.w/5;
-			cmp.r = Math.round(cmp.buffer/6);
+			cmp.r = Math.round(cmp.buffer/7);
 		}
 
 

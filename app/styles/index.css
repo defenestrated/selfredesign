@@ -612,6 +612,7 @@ ul.cartonav a {
 ul.cartonav a:hover { color: rgb(251,255,103) }
 
 table.carto {
+	visibility: hidden;
 }
 
 table.carto td {
@@ -713,10 +714,12 @@ g.link:hover ellipse.link{
 
 .axislabel {
 	text-anchor: middle;
+	font-size: 14px;
+	font-weight: bold;
 }
 
 rect.boundingbox {
-	display: none;
+/* 	display: none; */
 }
 
 .x-axis path,
