@@ -689,7 +689,7 @@ ellipse.link {
 }
 
 circle.orbcircle {
-	fill: rgba(255,255,255,0.5);
+	fill: rgba(255,255,255,0.9);
 	stroke: black;
 	stroke-width: 2pt;
 	transition: fill .5s;

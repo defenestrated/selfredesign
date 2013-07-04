@@ -429,9 +429,9 @@ function(app, Project, Controls) {
 			d3.select(this).moveToFront();
 			$("g.label").fadeIn("fast");
 				
-			d3.selectAll("line.leader." + which)
+			d3.selectAll("line.leader:not(." + which + ")")
 				.transition(300)
-				.style("stroke-width", "3px");
+				.style("stroke", "rgba(0,0,0,0.3)");
 			
 		});
 		
@@ -444,9 +444,9 @@ function(app, Project, Controls) {
 			$("g.label").fadeOut("fast", function () {
 				$(this).remove();
 			});
-			d3.selectAll("line.leader." + which)
+			d3.selectAll("line.leader:not(." + which + ")")
 				.transition(300)
-				.style("stroke-width", "1px");
+				.style("stroke", "rgba(0,0,0,1)");
 		});
 		
 		$("g.node").on("click", function () {
@@ -472,10 +472,10 @@ function(app, Project, Controls) {
 		
 			if (app.maptype == "date") {
 				cmp.leader
-					.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-					.attr("x2", function(d) { return cmp.xdate(cmp.formatDate(d.get("date"))) - d.x; } )
-					.attr("y2", function(d) { return (cmp.ymax+cmp.r*2) - d.y; } )
+					.attr("x2", function(d) { return d.x; } )
+					.attr("y2", function(d) { return d.y; } )
 					;
+
 			}
 			
 			else if (app.maptype == "materials") {
@@ -495,7 +495,7 @@ function(app, Project, Controls) {
 				
 					_(Cartofolio.elders.models).map(function ( ell ) {
 						if (ell.get("slug") == el.parentproject) {
-							cmp.leader.selectAll("line." + el.parentproject)
+							d3.selectAll("line." + el.parentproject)
 									.attr("x2", ell.x)
 									.attr("y2", ell.y)
 						}
@@ -676,8 +676,10 @@ function(app, Project, Controls) {
 			var portion = Math.floor(total/4);
 			var leftover = (total%4);
 			
+/*
 			console.log(allmaterials);
 			console.log("all materials: " + total + " total, divvied by four = " + portion + " with " + leftover + " left over");
+*/
 			
 			cmp.matlist = [
 				{"position": "top", 	"charlength": 0, "materials": []},
@@ -720,48 +722,45 @@ function(app, Project, Controls) {
 			cmp.matlist = _(cmp.matlist).sortBy(function (d) { return d.charlength; });
 			extras = _(extras).sortBy(function (d) { return d.charlength*-1; });
 			
-			console.log("--cmp.matlist--");
+/* 			console.log("--cmp.matlist--"); */
 			_(cmp.matlist).each(function (d) {
-				console.log(d);
+/* 				console.log(d); */
 			});
 			
-			console.log("--extras--");
+/* 			console.log("--extras--"); */
 			_(extras).each(function (d, i) {
-				console.log(d, i);
+/* 				console.log(d, i); */
 				cmp.matlist[i%4].materials.push(d.name);
 			});
 			
 			cmp.matlist.splice(4, 1);
 			
+/*
 			console.log("--new cmp.matlist--");
 			console.log(cmp.matlist);
+*/
 			_(cmp.matlist).each(function (d) {
 				d.charlength = 0;
-				console.log(d.position + ":");
 				_(d.materials).each(function (mat, i){
 					d.charlength += mat.name.replace(/[^ A-Z]/gi, "").length;
 					
 					switch(d.position) {
 						case "top":
-							console.log(mat);
 							mat.xpos = (cmp.xmax-cmp.xmin)/d.materials.length*(i+0.5) + cmp.xmin;
 							mat.ypos = cmp.ymin;
 							break;
 							
 						case "bottom":
-							console.log(mat);
 							mat.xpos = (cmp.xmax-cmp.xmin)/d.materials.length*(i+0.5) + cmp.xmin;
 							mat.ypos = cmp.ymax;
 							break;
 							
 						case "left":
-							console.log(mat);
 							mat.xpos = cmp.xmin;
 							mat.ypos = (cmp.ymax-cmp.ymin)/d.materials.length*(i+0.5) + cmp.ymin;
 							break;
 							
 						case "right":
-							console.log(mat);
 							mat.xpos = cmp.xmax;
 							mat.ypos = (cmp.ymax-cmp.ymin)/d.materials.length*(i+0.5) + cmp.ymin;
 							break;
@@ -932,13 +931,12 @@ function(app, Project, Controls) {
 			$("g.leaders").fadeOut(600, "easeInOutQuad", function () {
 				this.remove();
 				leaderappend();
-				
 			});
 		}
 		else leaderappend();
 		
-		function leaderappend() {
-			console.log("appending " + kind + " leaders");
+		function leaderappend() {			
+			
 			if (kind == "date") {
 				if ( $("g.leaders").length == 0 ) {
 					cmp.leader = cmp.parchment.insert("g", ":first-child")
@@ -948,10 +946,10 @@ function(app, Project, Controls) {
 					.enter().append("line")
 							.attr("z-index", -5)
 							.attr("class", function (d) { return "leader " + d.get("slug"); })
-							.attr("x1", 0)
-							.attr("y1", 0)
+							.attr("x1", function(d) { return cmp.xdate(cmp.formatDate(d.get("date"))); } )
+							.attr("y1", cmp.ymax+cmp.r*2 )
 							.attr("x2", function(d) { return d.x ; } )
-							.attr("y2", (cmp.ymax+cmp.r*2) )
+							.attr("y2", function (d) { return d.y; } )
 							.call(cmp.force.drag);
 					}
 					
@@ -974,15 +972,14 @@ function(app, Project, Controls) {
 			
 			
 				if ( $("g.leaders").length == 0 ) {
-					cmp.leader = cmp.parchment.insert("g", ":first-child")
+					cmp.matleader = cmp.parchment.insert("g", ":first-child")
 								.attr("class", "leaders");
 								
 					relevantmaterials.forEach(function (el, ix) {
 					
 						_(Cartofolio.elders.models).map(function ( ell ) {
 							if (ell.get("slug") == el.parentproject) {
-								console.log(ell);
-								cmp.leader.append("line")
+								cmp.matleader.append("line")
 										.attr("z-index", -5)
 										.attr("class", "leader " + el.parentproject + " " + el.obj.name)
 										.attr("x1", el.obj.xpos)
