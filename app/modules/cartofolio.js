@@ -988,7 +988,7 @@ function(app, Project, Controls) {
 					axes.append("text")
 						    .attr("class", "axislabel x-label")
 						    .attr("text-anchor", "middle")
-						    .attr("transform", "translate(" + ((cmp.xmax-cmp.xmin)/2 + cmp.buffer) + "," + (cmp.ymax + cmp.buffer*3/4) + ")")
+						    .attr("transform", "translate(" + ((cmp.xmax-cmp.xmin)/2 + cmp.xmin) + "," + (cmp.ymax + cmp.buffer*3/4) + ")")
 						    .text("when it got finished");
 				}
 			
@@ -1001,7 +1001,7 @@ function(app, Project, Controls) {
 					axes.append("text")
 						    .attr("class", "axislabel y-label")
 						    .attr("text-anchor", "middle")
-						    .attr("transform", "translate(" + (cmp.buffer/2) + "," + ((cmp.ymax-cmp.ymin)/2 + cmp.buffer) + "), rotate(-90)")
+						    .attr("transform", "translate(" + (cmp.buffer/2) + "," + ((cmp.ymax-cmp.ymin)/2 + cmp.ymin) + "), rotate(-90)")
 						    .text("hours i spent working on it");
 				}
 			}
@@ -1009,14 +1009,14 @@ function(app, Project, Controls) {
 			else if (kind == "active") {
 				axes.append("text")
 					.attr("class", "axislabel")
-					.attr("x", (cmp.xmax-cmp.xmin)/2+cmp.buffer)
+					.attr("x", (cmp.xmax-cmp.xmin)/2+cmp.xmin)
 					.attr("y", cmp.ymin-cmp.buffer/2)
 					.attr("dy", "0")
 					.text("ongoing")
 					;
 				axes.append("text")
 					.attr("class", "axislabel")
-					.attr("x", (cmp.xmax-cmp.xmin)/2+cmp.buffer)
+					.attr("x", (cmp.xmax-cmp.xmin)/2+cmp.xmin)
 					.attr("y", cmp.ymax+cmp.buffer/2)
 					.attr("dy", "1em")
 					.text("completed")
@@ -1025,8 +1025,8 @@ function(app, Project, Controls) {
 				axes.append("line")
 					.attr("x1",cmp.xmin)
 					.attr("x2",cmp.xmax)
-					.attr("y1",(cmp.ymax-cmp.ymin)/2+cmp.buffer)
-					.attr("y2",(cmp.ymax-cmp.ymin)/2+cmp.buffer)
+					.attr("y1",(cmp.ymax-cmp.ymin)/2+cmp.ymin)
+					.attr("y2",(cmp.ymax-cmp.ymin)/2+cmp.ymin)
 					;
 			}
 			
