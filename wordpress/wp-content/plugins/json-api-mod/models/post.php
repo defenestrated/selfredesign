@@ -191,7 +191,6 @@ class JSON_API_Post {
 	$materials = wp_get_object_terms($this->id, 'materials', $args);
 	$techniques = wp_get_object_terms($this->id, 'techniques', $args);
     $dimensions = wp_get_object_terms($this->id, 'dimensions', $args);
-    $dimensions = floatval($dimensions[0]);
     $scale = wp_get_object_terms($this->id, 'scale', $args);
     $scale = floatval($scale[0]);
     $reasons = wp_get_object_terms($this->id, 'reasons', $args);

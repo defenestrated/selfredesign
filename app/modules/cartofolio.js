@@ -750,7 +750,6 @@ function(app, Project, Controls) {
 				cmp.matlist[i%4].materials.push(d.name);
 			});
 			
-			console.log(cmp.matlist);
 			// remove "extra" portion (which is now useless) from mondo list
 			cmp.matlist.forEach(function ( d, i ) {
 				if (d.position == "extra") cmp.matlist.splice(i, 1);
@@ -908,8 +907,6 @@ function(app, Project, Controls) {
 				});
 			});
 			
-			console.log(cmp.techlist);
-			
 			// for each project, make a list of the items it should care about
 			Cartofolio.elders.models.forEach(function(d, i) {
 				var relevanttechniques = [];
@@ -937,7 +934,24 @@ function(app, Project, Controls) {
 		}
 
 /* 		!:::: dimensions :::: */
-		else if (kind == "dimensions") {}
+		else if (kind == "dimensions") {
+			
+			Cartofolio.elders.models.forEach(function (d, i) {
+				// if dimensions include a +, it's temporal
+				var temporal = d.get("dimensions").toString().search("[\+]") != -1;
+				// strip out just the non-time dimensions
+				var dims = d.get("dimensions").toString().replace(new RegExp("[\+]."), "");
+				
+				// temporal = up
+				if (temporal) d.y0 = cmp.ymin;
+				else d.y0 = cmp.ymax;
+				
+				// split into 3 dimensions
+				d.x0 = (cmp.xmax - cmp.xmin)/2 * (dims-1) + cmp.xmin;
+				
+/* 				console.log(d.get("title") + ": " + d.get("dimensions") + " temporal = " + temporal + " dims = " + dims); */
+			});
+		}
 
 /* 		!:::: scale :::: */
 		else if (kind == "scale") {}
@@ -1088,6 +1102,43 @@ function(app, Project, Controls) {
 					
 					});
 				});
+			}
+			
+			else if (kind == "dimensions") {
+				axes.append("text")
+					.attr("class", "axislabel")
+					.attr("x", (cmp.xmax-cmp.xmin)/2+cmp.xmin)
+					.attr("y", cmp.ymin-cmp.buffer/2)
+					.attr("dy", "0")
+					.text("temporal")
+					;
+				axes.append("text")
+					.attr("class", "axislabel")
+					.attr("x", (cmp.xmax-cmp.xmin)/2+cmp.xmin)
+					.attr("y", cmp.ymax+cmp.buffer/2)
+					.attr("dy", "1em")
+					.text("atemporal")
+					;
+					
+				for (var i = 0; i < 3; i++) {
+					axes.append("text")
+						.attr("class","axislabel")
+						.attr("x", (cmp.xmax-cmp.xmin)/2*i+cmp.xmin)
+						.attr("y", (cmp.ymax-cmp.ymin)/2 + cmp.ymin)
+						.attr("dy", "1em")
+						.text(i+1)
+						;
+				}
+				
+				for (var i = 0; i <= 1; i++) {
+					axes.append("line")
+						.attr("x1",(cmp.xmax-cmp.xmin)/2*i+cmp.xmin+((cmp.xmax-cmp.xmin)/4))
+						.attr("x2",(cmp.xmax-cmp.xmin)/2*i+cmp.xmin+((cmp.xmax-cmp.xmin)/4))
+						.attr("y1",cmp.ymin)
+						.attr("y2",cmp.ymax)
+						;
+				}
+				
 			}
 			
 			$(".axes").fadeIn(300, "easeInOutQuad");
