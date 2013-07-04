@@ -718,6 +718,13 @@ g.link:hover ellipse.link{
 	font-weight: bold;
 }
 
+.alignright {
+	text-anchor: end;
+}
+.alignleft {
+	text-anchor: start;
+}
+
 rect.boundingbox {
 /* 	display: none; */
 }

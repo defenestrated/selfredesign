@@ -470,12 +470,39 @@ function(app, Project, Controls) {
 			 
 		if ( $("g.leaders").length != 0 ) {
 		
-			if (app.maptype = "date") {
+			if (app.maptype == "date") {
 				cmp.leader
 					.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
 					.attr("x2", function(d) { return cmp.xdate(cmp.formatDate(d.get("date"))) - d.x; } )
 					.attr("y2", function(d) { return (cmp.ymax+cmp.r*2) - d.y; } )
 					;
+			}
+			
+			else if (app.maptype == "materials") {
+				var relevantmaterials = [];
+				Cartofolio.elders.models.forEach(function(d, i) {
+					_(cmp.matlist).each(function (matcluster) {
+						_(matcluster.materials).each(function (matObj) {
+							_(d.get("materials")).each(function (nodeMat) {
+								if (nodeMat == matObj.name) relevantmaterials.push({"obj": matObj, "parentproject" : d.get("slug") } );
+							});
+						});
+					});
+				});
+				
+				
+				relevantmaterials.forEach(function (el, ix) {
+				
+					_(Cartofolio.elders.models).map(function ( ell ) {
+						if (ell.get("slug") == el.parentproject) {
+							cmp.leader.selectAll("line." + el.parentproject)
+									.attr("x2", ell.x)
+									.attr("y2", ell.y)
+						}
+					});
+				
+					
+				});
 			}
 		    
 	    }
@@ -652,7 +679,7 @@ function(app, Project, Controls) {
 			console.log(allmaterials);
 			console.log("all materials: " + total + " total, divvied by four = " + portion + " with " + leftover + " left over");
 			
-			var matlist = [
+			cmp.matlist = [
 				{"position": "top", 	"charlength": 0, "materials": []},
 				{"position": "right", 	"charlength": 0, "materials": []},
 				{"position": "bottom", 	"charlength": 0, "materials": []},
@@ -663,54 +690,106 @@ function(app, Project, Controls) {
 			var extras = [];
 			
 			_(allmaterials).each(function (d,i) {
-				if (i < portion) 						matlist[0].materials.push(d);
-				if (i >= portion && i < portion*2) 		matlist[1].materials.push(d);
-				if (i >= portion*2 && i < portion*3) 	matlist[2].materials.push(d);
-				if (i >= portion*3 && i < portion*4) 	matlist[3].materials.push(d);
-				if (i >= portion*4) 					matlist[4].materials.push(d);
+				if (i < portion) 						cmp.matlist[0].materials.push({"name" : d, "xpos" : 0, "ypos" : 0});
+				if (i >= portion && i < portion*2) 		cmp.matlist[1].materials.push({"name" : d, "xpos" : 0, "ypos" : 0});
+				if (i >= portion*2 && i < portion*3) 	cmp.matlist[2].materials.push({"name" : d, "xpos" : 0, "ypos" : 0});
+				if (i >= portion*3 && i < portion*4) 	cmp.matlist[3].materials.push({"name" : d, "xpos" : 0, "ypos" : 0});
+				if (i >= portion*4) 					cmp.matlist[4].materials.push({"name" : d, "xpos" : 0, "ypos" : 0});
 			});
 			
-			_(matlist).each(function (d) {
+
+			_(cmp.matlist).each(function (d) {
 				_(d.materials).each(function (mat){
-					d.charlength += mat.replace(/[^ A-Z]/gi, "").length;
+					d.charlength += mat.name.replace(/[^ A-Z]/gi, "").length;
 				});
 				
 				if (d.position == "extra") {
 					_(d.materials).each(function (mat){
 						extras.push({
 							"name": mat,
-							"charlength": mat.replace(/[^ A-Z]/gi, "").length
+							"charlength": mat.name.replace(/[^ A-Z]/gi, "").length
 							});
 					});
 					
 					
 				}
-				console.log(d.charlength, d.materials);
 			});
+
+
 			
-			matlist = _(matlist).sortBy(function (d) { return d.charlength; });
+			cmp.matlist = _(cmp.matlist).sortBy(function (d) { return d.charlength; });
 			extras = _(extras).sortBy(function (d) { return d.charlength*-1; });
 			
-/* 			console.log("--matlist--"); */
-			_(matlist).each(function (d) {
+			console.log("--cmp.matlist--");
+			_(cmp.matlist).each(function (d) {
 				console.log(d);
 			});
 			
-/* 			console.log("--extras--"); */
+			console.log("--extras--");
 			_(extras).each(function (d, i) {
 				console.log(d, i);
-				matlist[i%4].materials.push(d.name);
+				cmp.matlist[i%4].materials.push(d.name);
 			});
 			
-/* 			console.log("--new matlist--"); */
-			_(matlist).each(function (d) {
+			cmp.matlist.splice(4, 1);
+			
+			console.log("--new cmp.matlist--");
+			console.log(cmp.matlist);
+			_(cmp.matlist).each(function (d) {
 				d.charlength = 0;
-/* 				console.log("position: " + d.position); */
-				_(d.materials).each(function (mat){
-					d.charlength += mat.replace(/[^ A-Z]/gi, "").length;
-					console.log(mat);
+				console.log(d.position + ":");
+				_(d.materials).each(function (mat, i){
+					d.charlength += mat.name.replace(/[^ A-Z]/gi, "").length;
+					
+					switch(d.position) {
+						case "top":
+							console.log(mat);
+							mat.xpos = (cmp.xmax-cmp.xmin)/d.materials.length*(i+0.5) + cmp.xmin;
+							mat.ypos = cmp.ymin;
+							break;
+							
+						case "bottom":
+							console.log(mat);
+							mat.xpos = (cmp.xmax-cmp.xmin)/d.materials.length*(i+0.5) + cmp.xmin;
+							mat.ypos = cmp.ymax;
+							break;
+							
+						case "left":
+							console.log(mat);
+							mat.xpos = cmp.xmin;
+							mat.ypos = (cmp.ymax-cmp.ymin)/d.materials.length*(i+0.5) + cmp.ymin;
+							break;
+							
+						case "right":
+							console.log(mat);
+							mat.xpos = cmp.xmax;
+							mat.ypos = (cmp.ymax-cmp.ymin)/d.materials.length*(i+0.5) + cmp.ymin;
+							break;
+					}
 				});
-/* 				console.log("---"); */
+			});
+			
+			Cartofolio.elders.models.forEach(function(d, i) {
+				var relevantmaterials = [];
+				_(cmp.matlist).each(function (matcluster) {
+					_(matcluster.materials).each(function (matObj) {
+						_(d.get("materials")).each(function (nodeMat) {
+							if (nodeMat == matObj.name) relevantmaterials.push(matObj);
+						});
+					});
+				});
+				
+				var xtot = 0;
+				_(relevantmaterials).each(function ( r ) {
+					xtot += r.xpos;
+				});
+				var ytot = 0;
+				_(relevantmaterials).each(function ( r ) {
+					ytot += r.ypos;
+				});
+				
+				d.x0 = xtot / relevantmaterials.length;
+				d.y0 = ytot / relevantmaterials.length;
 			});
 			
 			
@@ -813,6 +892,34 @@ function(app, Project, Controls) {
 					;
 			}
 			
+			else if (kind == "materials") {
+				_(cmp.matlist).each(function(d) {
+					_(d.materials).each(function (mat, i){
+					var thetext = axes.append("text")
+									.attr("class", "axislabel")
+									.attr("x", mat.xpos)
+									.attr("y", mat.ypos)
+									.text(mat.name);
+									
+					switch(d.position) {
+						case "top":
+							thetext.attr("dy", "-.5em");
+							break;
+						case "bottom":
+							thetext.attr("dy", "1.2em");
+							break;
+						case "left":
+							thetext.attr("class", "axislabel alignright");
+							break;
+						case "right":
+							thetext.attr("class", "axislabel alignleft");
+							break;
+					}
+					
+					});
+				});
+			}
+			
 			$(".axes").fadeIn(300, "easeInOutQuad");
 		}
 		
@@ -831,6 +938,7 @@ function(app, Project, Controls) {
 		else leaderappend();
 		
 		function leaderappend() {
+			console.log("appending " + kind + " leaders");
 			if (kind == "date") {
 				if ( $("g.leaders").length == 0 ) {
 					cmp.leader = cmp.parchment.insert("g", ":first-child")
@@ -848,6 +956,48 @@ function(app, Project, Controls) {
 					}
 					
 					$("g.leaders").fadeIn(600, "easeInOutQuad");
+			}
+			
+			else if (kind == "materials") {
+				var relevantmaterials = [];
+				Cartofolio.elders.models.forEach(function(d, i) {
+					_(cmp.matlist).each(function (matcluster) {
+						_(matcluster.materials).each(function (matObj) {
+							_(d.get("materials")).each(function (nodeMat) {
+								if (nodeMat == matObj.name) relevantmaterials.push({"obj": matObj, "parentproject" : d.get("slug") } );
+							});
+						});
+					});
+				});
+				
+
+			
+			
+				if ( $("g.leaders").length == 0 ) {
+					cmp.leader = cmp.parchment.insert("g", ":first-child")
+								.attr("class", "leaders");
+								
+					relevantmaterials.forEach(function (el, ix) {
+					
+						_(Cartofolio.elders.models).map(function ( ell ) {
+							if (ell.get("slug") == el.parentproject) {
+								console.log(ell);
+								cmp.leader.append("line")
+										.attr("z-index", -5)
+										.attr("class", "leader " + el.parentproject + " " + el.obj.name)
+										.attr("x1", el.obj.xpos)
+										.attr("y1", el.obj.ypos)
+										.attr("x2", ell.x)
+										.attr("y2", ell.y)
+										.call(cmp.force.drag);
+							}
+						});
+					
+						
+					});
+				}
+					
+				$("g.leaders").fadeIn(600, "easeInOutQuad");
 			}
 		}
 	},
@@ -876,8 +1026,8 @@ function(app, Project, Controls) {
 
 
 		cmp.s = 2*cmp.r/150;
-		cmp.xmin = cmp.buffer;
-		cmp.xmax = (cmp.w-cmp.buffer-cmp.sidebar);
+		cmp.xmin = cmp.buffer*1.5;
+		cmp.xmax = (cmp.w-cmp.buffer*1.5-cmp.sidebar);
 		cmp.ymax = cmp.h-cmp.buffer;
 		cmp.ymin = cmp.buffer;
 		
