@@ -325,7 +325,6 @@ function(app, Project, Controls) {
 			["how i made it", "techniques"						   		],
 			["how many dimensions it occupies",	"dimensions"	   		],
 			["how big it is", "scale"							   		],
-			["why i made it", "reasons"							   		],
 			["no logic at all", "random"						   		]
 		];
 
@@ -954,7 +953,26 @@ function(app, Project, Controls) {
 		}
 
 /* 		!:::: scale :::: */
-		else if (kind == "scale") {}
+		else if (kind == "scale") {
+			var maxproj = _.max(Cartofolio.elders.models, function (m) {
+					return m.get("scale");
+				});
+			var minproj = _.min(Cartofolio.elders.models, function (m) {
+					return m.get("scale");
+				});
+			
+			
+			
+			cmp.scalex = d3.scale.linear()
+							.domain([minproj.get("scale"), maxproj.get("scale")])
+							.rangeRound([cmp.xmin, cmp.xmax]);
+			
+			Cartofolio.elders.models.forEach(function (d, i) {
+				d.x0 = cmp.scalex(d.get("scale"));
+				d.y0 = (cmp.ymax-cmp.ymin)/2 + cmp.ymin;
+			});
+			
+		}
 
 /* 		!:::: reasons :::: */
 		else if (kind == "reasons") {}
@@ -985,8 +1003,8 @@ function(app, Project, Controls) {
 			
 			if (kind == "date") {
 				    
-				xAxis = d3.svg.axis().scale(cmp.xdate).orient("bottom");
-				yAxis = d3.svg.axis().scale(cmp.ydate).orient("left").ticks(3).tickFormat(function (d, i) {
+				var xAxis = d3.svg.axis().scale(cmp.xdate).orient("bottom");
+				var yAxis = d3.svg.axis().scale(cmp.ydate).orient("left").ticks(3).tickFormat(function (d, i) {
 					if (i==0) return "a few";
 					else return d;
 				});
@@ -1137,6 +1155,26 @@ function(app, Project, Controls) {
 						.attr("y1",cmp.ymin)
 						.attr("y2",cmp.ymax)
 						;
+				}
+				
+			}
+			
+			else if (kind == "scale") {
+				var scalexaxis = d3.svg.axis().scale(cmp.scalex).orient("bottom");
+				
+				var axes = d3.select("g.axes");
+				
+				if ( $("g.x-axis").length == 0 ) {
+					axes.append("g")
+							.attr("class", "x-axis")
+							.attr("transform", "translate(0," + (cmp.ymax+cmp.r*2) + ")")
+							.call(scalexaxis)
+							;
+					axes.append("text")
+						    .attr("class", "axislabel x-label")
+						    .attr("text-anchor", "middle")
+						    .attr("transform", "translate(" + ((cmp.xmax-cmp.xmin)/2 + cmp.xmin) + "," + (cmp.ymax + cmp.buffer*3/4) + ")")
+						    .text("cubic feet");
 				}
 				
 			}
@@ -1323,7 +1361,6 @@ function(app, Project, Controls) {
 			"used " + app.fixList(model, "techniques"),
 			"occupies " + model.get("dimensions") + " dimensions",
 			"takes up " + app.fixScale(model),
-			"made " + app.fixList(model, "reasons")
 		];
 
 		var wrapped = _(pieces).map(function (thing) {
