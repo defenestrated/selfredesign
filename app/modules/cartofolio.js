@@ -469,7 +469,7 @@ function(app, Project, Controls) {
 			 
 		if ( $("g.leaders").length != 0 ) {
 		
-			if (app.maptype == "date") {
+			if (app.maptype == "date" || app.maptype == "scale") {
 				cmp.leader
 					.attr("x2", function(d) { return d.x; } )
 					.attr("y2", function(d) { return d.y; } )
@@ -1289,6 +1289,24 @@ function(app, Project, Controls) {
 				}
 					
 				$("g.leaders").fadeIn(600, "easeInOutQuad");
+			}
+			else if (kind == "scale") {
+				if ( $("g.leaders").length == 0 ) {
+					cmp.leader = cmp.parchment.insert("g", ":first-child")
+							.attr("class", "leaders")
+							.selectAll("line")
+						.data(Cartofolio.elders.models)
+					.enter().append("line")
+							.attr("z-index", -5)
+							.attr("class", function (d) { return "leader " + d.get("slug"); })
+							.attr("x1", function(d) { return cmp.scalex(d.get("scale")); } )
+							.attr("y1", cmp.ymax+cmp.r*2 )
+							.attr("x2", function(d) { return d.x ; } )
+							.attr("y2", function (d) { return d.y; } )
+							.call(cmp.force.drag);
+					}
+					
+					$("g.leaders").fadeIn(600, "easeInOutQuad");
 			}
 		}
 	},
