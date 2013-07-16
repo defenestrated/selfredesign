@@ -315,7 +315,6 @@ table {
 	line-height: 1.2em;
 	font-weight: normal;
 	letter-spacing: 0.1em;
-	text-transform: capitalize;
 	margin: 0;
 }
 
@@ -612,7 +611,7 @@ ul.cartonav a {
 ul.cartonav a:hover { color: rgb(251,255,103) }
 
 table.carto {
-	visibility: hidden;
+/* 	visibility: hidden; */
 }
 
 table.carto td {

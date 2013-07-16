@@ -248,6 +248,7 @@ function(app, Project, Controls) {
 						cmp.temptype = app.maptype;
 						cmp.arrange("random");
 						cmp.arrange(cmp.temptype);
+						cmp.sizefix();
 					});
 				}
 	
@@ -271,6 +272,7 @@ function(app, Project, Controls) {
 			 	$(".container").fadeIn(600, "easeInOutQuad", function () {
 				 	cmp.sizefix();
 			 	});
+			 	cmp.sizefix();
 			 	
 				cmp.firstRender = false;
 			}
@@ -288,7 +290,7 @@ function(app, Project, Controls) {
 			cmp.pymax = cmp.h-cmp.buffer;
 			cmp.pymin = cmp.buffer;
 			
-
+			
 		},
 
 
@@ -322,7 +324,7 @@ function(app, Project, Controls) {
 			["whether it's ongoing or completed", "active"	   			],
 			["when it was made and how many hours it took",	"date"		],
 			["what it's made of", "materials"					   		],
-			["how i made it", "techniques"						   		],
+			["what kind of work it is", "techniques"					],
 			["how many dimensions it occupies",	"dimensions"	   		],
 			["how big it is", "scale"							   		],
 			["no logic at all", "random"						   		]
@@ -341,6 +343,8 @@ function(app, Project, Controls) {
 			nr.navigate('cartofolio/' + e.currentTarget.id);
 			cmp.arrange(e);
 		});
+		
+		cmp.sizefix();
 		
 		cmp.parchment.append("rect")
 			.attr("class", "boundingbox")
@@ -1004,10 +1008,7 @@ function(app, Project, Controls) {
 			if (kind == "date") {
 				    
 				var xAxis = d3.svg.axis().scale(cmp.xdate).orient("bottom");
-				var yAxis = d3.svg.axis().scale(cmp.ydate).orient("left").ticks(3).tickFormat(function (d, i) {
-					if (i==0) return "a few";
-					else return d;
-				});
+				var yAxis = d3.svg.axis().scale(cmp.ydate).orient("left").ticks(4);
 				
 				var axes = d3.select("g.axes");
 				
@@ -1376,7 +1377,7 @@ function(app, Project, Controls) {
 			app.fixDate(model),
 			"took " + model.get("hours") + " hours of work",
 			"made with " + app.fixList(model, "materials"),
-			"used " + app.fixList(model, "techniques"),
+			"uses " + app.fixList(model, "techniques"),
 			"occupies " + model.get("dimensions") + " dimensions",
 			"takes up " + app.fixScale(model),
 		];

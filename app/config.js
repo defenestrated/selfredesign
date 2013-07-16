@@ -8,7 +8,7 @@ require.config({
 
   paths: {
     // Put paths here.
-    plugins: "../vendor/js/plugins"
+    plugins: "../vendor/js/plugins",
   },
 
   shim: {
