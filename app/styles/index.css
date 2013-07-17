@@ -356,6 +356,8 @@ table {
 }
 
 .little_thumb {
+	width: 150px;
+	height: 150px;
 	display: none;
 	border: 5px solid black;
 	position: absolute;
@@ -377,14 +379,29 @@ table {
 	line-height: 1.2em;
 }
 
+.maincontent p a {
+	font-style: italic;
+	letter-spacing: 1px;
+}
+
 /* !- - - - - - gallery - - - - - -*/
+
+.gallery h2 {
+	padding: 100px 0 20px 0;
+	margin-bottom: 20px;
+	border-bottom: 1px solid black;
+	font-size: 14px;
+	font-weight: normal;
+	font-style: italic;
+	letter-spacing: 1px;
+}
 
 .gthumb {
 	border: 2px solid black;
 	width: 100px;
 	height: 100px;
 	float: left;
-	margin: 0px -2px -2px 0;
+	margin: 5px;
 }
 
 .gfill {

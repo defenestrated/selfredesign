@@ -1404,8 +1404,9 @@ function(app, Project, Controls) {
 		]);
 
 		// !---- GALLERY ----
-
-		$(".mainstage").append("<div class='gallery'></div>");
+		
+		
+		$(".mainstage").append("<div class='gallery'><h2>" + model.get("title") + " image gallery</h2></div>");
 
 		var attachments = _(model.get("attachments")).filter(function (attachment) {
 			return attachment.slug.search("icon") == -1;
@@ -1558,7 +1559,18 @@ function(app, Project, Controls) {
 
  	  	$(document).keydown(function(e) {
 		    if (e.keyCode == 27) {
+		    	// esc
 		        cmp.destroy();
+		    }
+		    
+		    else if (e.keyCode == 37) {
+			    // left arrow
+			    if (typeof cmp.primage !== "undefined") cmp.lineup(cmp.primage.slug);
+		    }
+		    
+		    else if (e.keyCode == 39) {
+			    // right arrow
+			    if (typeof cmp.nximage !== "undefined") cmp.lineup(cmp.nximage.slug);
 		    }
 		});
 	  },
