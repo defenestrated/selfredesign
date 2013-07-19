@@ -24,14 +24,11 @@ function(app, Project, Controls) {
 
   Cartofolio.extractElders = function() {
   	var elds = _(Cartofolio.projects.models).filter(function (model) {
-		return model.get("parent") == 0;
+		return model.get("parent") === 0;
 	});
 	Cartofolio.elders.reset(elds);
 	Cartofolio.elders.trigger("greenlight");
-
-
-/* 	app.mainrouter.navigate("debug", { trigger: true }); */
-  }
+  };
 
   Cartofolio.Views = {};
 
@@ -129,14 +126,15 @@ function(app, Project, Controls) {
 			(function shownext(jq){
 				jq.eq(0).fadeIn(300, "easeInQuad", function(){
 					$(".skelproj").eq(count).fadeIn(600, "easeInQuad");
-					(jq=jq.slice(1)).length && shownext(jq);
+					jq = jq.slice(1);
+					shownext(jq);
 					count++;
 				});
 			})($('div.skelback'));
 
 	  },
 
-	  sizefix: function () {},
+	  sizefix: function () {}
 
   });
 
@@ -158,7 +156,7 @@ function(app, Project, Controls) {
 		yscale: '',
 		w: '',
 		h: '',
-		x: '', y: '', ux: '', uy: '', pxmin: '', xmin: '', pymin: '', ymin: '', pxmax: '', xmax: '', pymax: '', ymax: '', axes: '', leader: '',
+		x: '', y: '', pxmin: '', xmin: '', pymin: '', ymin: '', pxmax: '', xmax: '', pymax: '', ymax: '', axes: '', leader: '',
 		lastX: 0,
 		lastY: 0,
 		firstRender: true,
@@ -208,9 +206,9 @@ function(app, Project, Controls) {
 			_.bindAll(this);
 			var cmp = this;
 			d3.selection.prototype.moveToFront = function() {
-			  return this.each(function(){
-			  this.parentNode.appendChild(this);
-			  });
+				 return this.each(function(){
+				 this.parentNode.appendChild(this);
+				 });
 			};
 		},
 		
@@ -317,17 +315,17 @@ function(app, Project, Controls) {
 		$("ul.cartonav").append([
 			"<a	href='skeleton'><li id='skeleton'>	see projects in a list </li></a>",
 			"<a	href='contact'>	<li id='contact'>	contact	</li></a>",
-			"<a	href='resumes'>	<li id='resumes'>	resumé	</li></a>",
+			"<a	href='resumes'>	<li id='resumes'>	resumé	</li></a>"
 		]);
 		
 		var pieces = [
-			["whether it's ongoing or completed", "active"	   			],
+			["whether it's ongoing or completed", "active"		 			],
 			["when it was made and how many hours it took",	"date"		],
-			["what it's made of", "materials"					   		],
+			["what it's made of", "materials"								],
 			["what kind of work it is", "techniques"					],
 			["how many dimensions it occupies",	"dimensions"	   		],
-			["how big it is", "scale"							   		],
-			["no logic at all", "random"						   		]
+			["how big it is", "scale"								  		],
+			["no logic at all", "random"									]
 		];
 
 		var wrapped = _(pieces).map(function (thing) {
@@ -415,8 +413,8 @@ function(app, Project, Controls) {
 					;
 		
 			var ltext = label.append("svg:text")
-						.attr("x", function ( d ) { return cmp.r + 20 })
-						.attr("y", function ( d ) {	return 0 })
+						.attr("x", function ( d ) { return cmp.r + 20; })
+						.attr("y", function ( d ) {	return 0; })
 						.attr("dy", "0.3em")
 						.text(function (d) { return d.get("title"); })
 						;
@@ -533,8 +531,8 @@ function(app, Project, Controls) {
 					
 				});
 			}
-		    
-	    }
+			  
+		 }
 	},
 
 	gravity: function(k) {
@@ -676,9 +674,9 @@ function(app, Project, Controls) {
 			var hours = _(Cartofolio.elders.models).map(function (d) { return d.get("hours")});
 			
 			cmp.xdate = d3.time.scale()
-			        .domain(d3.extent(dates))
-			        .nice(d3.time.year)
-			        .range([cmp.xmin, cmp.xmax]);
+					   .domain(d3.extent(dates))
+					   .nice(d3.time.year)
+					   .range([cmp.xmin, cmp.xmax]);
 			
 			cmp.ydate = d3.scale.linear()
 					.domain(d3.extent(hours))
@@ -1006,7 +1004,7 @@ function(app, Project, Controls) {
 			}
 			
 			if (kind == "date") {
-				    
+					
 				var xAxis = d3.svg.axis().scale(cmp.xdate).orient("bottom");
 				var yAxis = d3.svg.axis().scale(cmp.ydate).orient("left").ticks(4);
 				
@@ -1019,10 +1017,10 @@ function(app, Project, Controls) {
 							.call(xAxis)
 							;
 					axes.append("text")
-						    .attr("class", "axislabel x-label")
-						    .attr("text-anchor", "middle")
-						    .attr("transform", "translate(" + ((cmp.xmax-cmp.xmin)/2 + cmp.xmin) + "," + (cmp.ymax + cmp.buffer*3/4) + ")")
-						    .text("when it got finished");
+							  .attr("class", "axislabel x-label")
+							  .attr("text-anchor", "middle")
+							  .attr("transform", "translate(" + ((cmp.xmax-cmp.xmin)/2 + cmp.xmin) + "," + (cmp.ymax + cmp.buffer*3/4) + ")")
+							  .text("when it got finished");
 				}
 			
 				if ( $("g.y-axis").length == 0 ) {
@@ -1032,10 +1030,10 @@ function(app, Project, Controls) {
 							.call(yAxis)			
 							;
 					axes.append("text")
-						    .attr("class", "axislabel y-label")
-						    .attr("text-anchor", "middle")
-						    .attr("transform", "translate(" + (cmp.buffer/2) + "," + ((cmp.ymax-cmp.ymin)/2 + cmp.ymin) + "), rotate(-90)")
-						    .text("hours i spent working on it");
+							  .attr("class", "axislabel y-label")
+							  .attr("text-anchor", "middle")
+							  .attr("transform", "translate(" + (cmp.buffer/2) + "," + ((cmp.ymax-cmp.ymin)/2 + cmp.ymin) + "), rotate(-90)")
+							  .text("hours i spent working on it");
 				}
 			}
 			
@@ -1172,10 +1170,10 @@ function(app, Project, Controls) {
 							.call(scalexaxis)
 							;
 					axes.append("text")
-						    .attr("class", "axislabel x-label")
-						    .attr("text-anchor", "middle")
-						    .attr("transform", "translate(" + ((cmp.xmax-cmp.xmin)/2 + cmp.xmin) + "," + (cmp.ymax + cmp.buffer*3/4) + ")")
-						    .text("cubic feet");
+							  .attr("class", "axislabel x-label")
+							  .attr("text-anchor", "middle")
+							  .attr("transform", "translate(" + ((cmp.xmax-cmp.xmin)/2 + cmp.xmin) + "," + (cmp.ymax + cmp.buffer*3/4) + ")")
+							  .text("cubic feet");
 				}
 				
 			}
@@ -1404,9 +1402,6 @@ function(app, Project, Controls) {
 		]);
 
 		// !---- GALLERY ----
-		
-		
-		$(".mainstage").append("<div class='gallery'><h2>" + model.get("title") + " image gallery</h2></div>");
 
 		var attachments = _(model.get("attachments")).filter(function (attachment) {
 			return attachment.slug.search("icon") == -1;
@@ -1419,6 +1414,10 @@ function(app, Project, Controls) {
 			+ attch.images.thumbnail.url
 			+ ")no-repeat center center'><div class='gfill'></div></div>";
 		})
+		
+		if (images.length !== 0) {
+			$(".mainstage").append("<div class='gallery'><h2>" + model.get("title") + " image gallery</h2></div>");
+		}
 
 		$(".gallery").append(images);
 
@@ -1490,9 +1489,9 @@ function(app, Project, Controls) {
 				$(".sidebar, .sidebar th, .sidebar td, .mainstage").removeClass("skinny");
 
 				if ($(".container").width()/4 < 300) $(".sidebar").css("width", "300px");
-		  		else if ($(".container").width()/4 >= 300) $(".sidebar").css("width", $(".container").width()/4 + "px");
+					else if ($(".container").width()/4 >= 300) $(".sidebar").css("width", $(".container").width()/4 + "px");
 
-		  		$(".little_thumb").hide();
+					$(".little_thumb").hide();
 				$(".content_thumb").show();
 
 				$(".sidebar").css("height", $(window).height()-$(".header").outerHeight());
@@ -1532,19 +1531,19 @@ function(app, Project, Controls) {
 
   }); // end single view
 
-/*   !==== PHOTO BOX VIEW ==== */
+/*	 !==== PHOTO BOX VIEW ==== */
 
   Cartofolio.Views.Photobox = Backbone.Layout.extend({
-  	  className: "photobox",
-  	  template: "gallery",
+  		 className: "photobox",
+  		 template: "gallery",
 
-  	  images: {},
+  		 images: {},
 
-  	  primage: "",
-  	  crimage: "",
-  	  nximage: "",
-  	  height: $(window).height() - 50,
-  	  firstRender: true,
+  		 primage: "",
+  		 crimage: "",
+  		 nximage: "",
+  		 height: $(window).height() - 50,
+  		 firstRender: true,
 
 	  initialize: function () {
 	  	var cmp = this;
@@ -1555,23 +1554,23 @@ function(app, Project, Controls) {
 			return attachment.slug.search("icon") == -1;
 		});
 
- 	  	console.log("--- photobox initialized with model " + cmp.model.get("title") + " and image " + cmp.crimage.title + " ---");
+ 			console.log("--- photobox initialized with model " + cmp.model.get("title") + " and image " + cmp.crimage.title + " ---");
 
- 	  	$(document).keydown(function(e) {
-		    if (e.keyCode == 27) {
-		    	// esc
-		        cmp.destroy();
-		    }
-		    
-		    else if (e.keyCode == 37) {
-			    // left arrow
-			    if (typeof cmp.primage !== "undefined") cmp.lineup(cmp.primage.slug);
-		    }
-		    
-		    else if (e.keyCode == 39) {
-			    // right arrow
-			    if (typeof cmp.nximage !== "undefined") cmp.lineup(cmp.nximage.slug);
-		    }
+ 			$(document).keydown(function(e) {
+			  if (e.keyCode == 27) {
+			  	// esc
+				  cmp.destroy();
+			  }
+			  
+			  else if (e.keyCode == 37) {
+				   // left arrow
+				   if (typeof cmp.primage !== "undefined") cmp.lineup(cmp.primage.slug);
+			  }
+			  
+			  else if (e.keyCode == 39) {
+				   // right arrow
+				   if (typeof cmp.nximage !== "undefined") cmp.lineup(cmp.nximage.slug);
+			  }
 		});
 	  },
 
@@ -1594,12 +1593,12 @@ function(app, Project, Controls) {
 	  		console.log(e.currentTarget.className);
 	  		cmp.turnoff();
 	  		cmp.turnon();
-		  	if (e.currentTarget.className == "next" || e.currentTarget.className == "nexts") {
-		  		if (typeof cmp.nximage !== "undefined") cmp.lineup(cmp.nximage.slug);
-		  	}
-		    else if (e.currentTarget.className == "prev" || e.currentTarget.className == "prevs") {
-			    if (typeof cmp.primage !== "undefined") cmp.lineup(cmp.primage.slug);
-		    }
+				if (e.currentTarget.className == "next" || e.currentTarget.className == "nexts") {
+					if (typeof cmp.nximage !== "undefined") cmp.lineup(cmp.nximage.slug);
+				}
+			  else if (e.currentTarget.className == "prev" || e.currentTarget.className == "prevs") {
+				   if (typeof cmp.primage !== "undefined") cmp.lineup(cmp.primage.slug);
+			  }
 	  	});
 		$(".photobox").fadeIn(200, "easeInOutQuad", function () {
 			cmp.sizefix();
@@ -1624,19 +1623,19 @@ function(app, Project, Controls) {
 	  lineup: function (desiredCurrent) {
 	  	 var cmp = this;
 		 _(cmp.images).each(function (image, i) {
-		  	if (image.slug == desiredCurrent) {
-		  		cmp.primage = cmp.images[i-1];
-		  		cmp.crimage = image;
-		  		cmp.nximage = cmp.images[i+1];
-		  	}
-		  	$("#caption").text(cmp.crimage.title);
-		  	var nr = new Backbone.Router({});
+				if (image.slug == desiredCurrent) {
+					cmp.primage = cmp.images[i-1];
+					cmp.crimage = image;
+					cmp.nximage = cmp.images[i+1];
+				}
+				$("#caption").text(cmp.crimage.title);
+				var nr = new Backbone.Router({});
 			nr.navigate("projects/" + cmp.model.get("slug") + "/images/" + cmp.crimage.slug);
 	  	});
 
 	  	($("img.currimg").length) ?
 	  		$("img.currimg").attr("src", cmp.crimage.images.large.url)
-		  	: $("td.currimg").append("<img class='currimg' src='" + cmp.crimage.images.large.url + "' height=" + cmp.height + "></img>");
+				: $("td.currimg").append("<img class='currimg' src='" + cmp.crimage.images.large.url + "' height=" + cmp.height + "></img>");
 
 		if (typeof cmp.primage !== "undefined") {
 			$("td.previmg").css("background", "url('" + cmp.primage.images.large.url + "') no-repeat center center");
@@ -1676,32 +1675,32 @@ function(app, Project, Controls) {
 	  },
 
 	  turnoff: function () {
-		  $.fx.off = true;
-		  $("td.prev").off("mouseenter mouseleave");
+			$.fx.off = true;
+			$("td.prev").off("mouseenter mouseleave");
 	  },
 
 	  turnon: _.debounce(function () {
-		  $.fx.off = false;
+			$.fx.off = false;
 
-		  $("td.prev, td.next").on('mouseenter', function (e) {
+			$("td.prev, td.next").on('mouseenter', function (e) {
 				if ($("." + e.currentTarget.className + " p").text() != "") {
 					$("." + e.currentTarget.className + "img").animate({"opacity": 0.3}, 200, "easeInOutQuad");
 					$("." + e.currentTarget.className + " p").animate({"background-color": "rgba(255,255,255,0.4)"}, 200, "easeInOutQuad");
 				}
-		  });
-		  $("td.prev, td.next").on('mouseleave', function (e) {
+			});
+			$("td.prev, td.next").on('mouseleave', function (e) {
 				if ($("." + e.currentTarget.className + " p").text() != "") {
-			  	$("." + e.currentTarget.className + "img").animate({"opacity": 0.05}, 200, "easeInOutQuad");
-			  	$("." + e.currentTarget.className + " p").animate({"background-color": "rgba(255,255,255,0.0)"}, 200, "easeInOutQuad");
+				 	$("." + e.currentTarget.className + "img").animate({"opacity": 0.05}, 200, "easeInOutQuad");
+				 	$("." + e.currentTarget.className + " p").animate({"background-color": "rgba(255,255,255,0.0)"}, 200, "easeInOutQuad");
 				}
-		  });
+			});
 
-		  $("td.previmg, td.nextimg, td.prev, td.next").css({
-			  "width": ($(window).width()-$("img.currimg").width())/2
-		  });
-		  $("td.curr").css({
-			  "width": $("td.currimg").width()
-		  });
+			$("td.previmg, td.nextimg, td.prev, td.next").css({
+				 "width": ($(window).width()-$("img.currimg").width())/2
+			});
+			$("td.curr").css({
+				 "width": $("td.currimg").width()
+			});
 	  }, 200),
 
 	  sizefix: function () {
@@ -1709,27 +1708,27 @@ function(app, Project, Controls) {
 	  		if ($(".header").outerHeight() != 0) cmp.height = $(window).height() - $(".closegallery").outerHeight();
 	  		
 	  		if (app.shouldBeSkinny) {
-		  		if ($("td.prev").is(":visible")) $("td.prev, td.next").fadeOut();
-		  		if ($("td.previmg").is(":visible")) $("td.previmg, td.nextimg").fadeOut(function () {
-		  			$("td.currimg").css({
-			  			"width": $(window).width(),
-			  			"text-align": "center"
-			  		});
-			  		$("td.curr, td.curr p").css({
+					if ($("td.prev").is(":visible")) $("td.prev, td.next").fadeOut();
+					if ($("td.previmg").is(":visible")) $("td.previmg, td.nextimg").fadeOut(function () {
+						$("td.currimg").css({
+				 			"width": $(window).width(),
+				 			"text-align": "center"
+				 		});
+				 		$("td.curr, td.curr p").css({
 						"width": $(window).width()
 					});
-		  		});
-		  		else if (! $("td.previmg").is(":visible")) {
-			  		$("td.currimg").css({
-			  			"width": $(window).width(),
-			  			"text-align": "center"
-			  		});
-			  		$("td.curr, td.curr p").css({
+					});
+					else if (! $("td.previmg").is(":visible")) {
+				 		$("td.currimg").css({
+				 			"width": $(window).width(),
+				 			"text-align": "center"
+				 		});
+				 		$("td.curr, td.curr p").css({
 						"width": $(window).width()
 					});
-		  		}
-		  		
-		  		
+					}
+					
+					
 				
 				
 
@@ -1739,8 +1738,8 @@ function(app, Project, Controls) {
 				if (!$("td.prev").is(":visible")) $("td.prev, td.next").fadeIn();
 				if (!$("td.previmg").is(":visible")) $("td.previmg, td.nextimg").fadeIn();
 				$("td.currimg").css({
-		  			"padding": ""
-		  		});
+						"padding": ""
+					});
 				$("td.curr, td.curr p").css({
 					"width": $("td.currimg").width()
 				});
@@ -1760,7 +1759,7 @@ function(app, Project, Controls) {
 			});
 			
 			$("td.previmg, td.nextimg, td.prev, td.next").animate({
-			  	"width": ($(window).width()-$("img.currimg").width())/2
+				 	"width": ($(window).width()-$("img.currimg").width())/2
 			});
 
 			

@@ -232,6 +232,21 @@ a.logo {
 	text-decoration: none;
 }
 
+.copyright {
+	position: fixed;
+	width: 100%;
+	overflow: hidden;
+	bottom: 9px;
+	left: 0;
+	word-spacing: 0.2em;
+	text-align: center;
+	font: normal normal 10px "Futura", "Lucida Console", monospace;
+	font-style: italic;
+	color: rgb(100,100,100);
+	letter-spacing: 0.1em;
+	text-decoration: none;
+}
+
 /* !-------------   projects   --------------- */
 
 .skelback {	
@@ -397,11 +412,11 @@ table {
 }
 
 .gthumb {
-	border: 2px solid black;
+	border: 1px solid black;
 	width: 100px;
 	height: 100px;
 	float: left;
-	margin: 5px;
+	margin: 10px;
 }
 
 .gfill {
