@@ -429,10 +429,12 @@ function(app, Project, Controls) {
 				;
 			d3.select(this).moveToFront();
 			$("g.label").fadeIn("fast");
+			
+			// !leader highlighting
 				
 			d3.selectAll("line.leader:not(." + which + ")")
 				.transition(300)
-				.style("stroke", "rgba(0,0,0,0.3)");
+				.style("stroke", "rgba(0,0,0,0.2)");
 			
 		});
 		
@@ -990,7 +992,7 @@ function(app, Project, Controls) {
 		var axes;
 		
 		if ($(".axes").length) $(".axes").fadeOut(300, "easeInOutQuad", function () {
-			this.remove();
+			$(".axes").remove();
 			axisappend();			
 		});
 		
@@ -1188,7 +1190,7 @@ function(app, Project, Controls) {
 		var cmp = this;
 		if ( $("g.leaders").length != 0 ) {
 			$("g.leaders").fadeOut(600, "easeInOutQuad", function () {
-				this.remove();
+				$("g.leaders").remove();
 				leaderappend();
 			});
 		}
